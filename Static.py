@@ -22,6 +22,8 @@ from ConfigParser import SafeConfigParser
 import platform
 import imp
 import sys
+reload(sys)
+sys.setdefaultencoding
 
 """
 	*****************************************************************************
@@ -1222,7 +1224,7 @@ def __analyze(writer, args) :
 
 
 	if allurls_strip_non_duplicated_final_prerun_count != 0:
-		writer.startWriter("SSL_URLS_NOT_IN_HTTPS", LEVEL_CRITICAL, "SSL Connection 검사", "SSL을 사용하지 않는 URLs입니다. (Total:" + str(allurls_strip_non_duplicated_final_prerun_count) + "):", ["SSL_Security"])
+		writer.startWriter("SSL_URLS_NOT_IN_HTTPS", LEVEL_CRITICAL, u"SSL Connection 검사", u"SSL을 사용하지 않는 URLs입니다. (Total:" + str(allurls_strip_non_duplicated_final_prerun_count) + "):", ["SSL_Security"])
 		
 		for url in allurls_strip_non_duplicated_final :
 
@@ -1244,7 +1246,7 @@ def __analyze(writer, args) :
 				pass
 
 	else:
-		writer.startWriter("SSL_URLS_NOT_IN_HTTPS", LEVEL_INFO, "SSL Connection 검사", "SSL을 사용하지 않는 URLs을 발견하지 못헀습니다. (알림: 만약 URL 문자열을 암호화했다면, 그것을 발견할 수 없습니다.).", ["SSL_Security"])
+		writer.startWriter("SSL_URLS_NOT_IN_HTTPS", LEVEL_INFO, u"SSL Connection 검사", u"SSL을 사용하지 않는 URLs을 발견하지 못헀습니다. (알림: 만약 URL 문자열을 암호화했다면, 그것을 발견할 수 없습니다.).", ["SSL_Security"])
 		
 	#--------------------------------------------------------------------
 	
@@ -1269,11 +1271,11 @@ def __analyze(writer, args) :
 						list_security_related_methods.append(method)
 
 		if list_security_related_methods :
-			writer.startWriter("Security_Methods", LEVEL_NOTICE, "Security Methods 검사", "보안 관련 메서드 이름 발견:")
+			writer.startWriter("Security_Methods", LEVEL_NOTICE, u"Security Methods 검사", u"보안 관련 메서드 이름 발견:")
 			for method in list_security_related_methods :
 				writer.write(method.get_class_name() + "->" + method.get_name() + method.get_descriptor())
 		else :
-			writer.startWriter("Security_Methods", LEVEL_INFO, "Security Methods 검사", "보안 관련 문자열을 포함하는 메서드 이름을 검색하지 못했습니다.")
+			writer.startWriter("Security_Methods", LEVEL_INFO, u"Security Methods 검사", u"보안 관련 문자열을 포함하는 메서드 이름을 검색하지 못했습니다.")
 			
 
 	#------------------------------------------------------------------------------------------------------
@@ -1289,12 +1291,12 @@ def __analyze(writer, args) :
 					list_security_related_classes.append(current_class)
 
 		if list_security_related_classes :
-			writer.startWriter("Security_Classes", LEVEL_NOTICE, "Security Classes 검사", "보안 관련 클래스 이름 발견:")
+			writer.startWriter("Security_Classes", LEVEL_NOTICE, u"Security Classes 검사", u"보안 관련 클래스 이름 발견:")
 			
 			for current_class in list_security_related_classes :
 				writer.write(current_class.get_name())
 		else :
-			writer.startWriter("Security_Classes", LEVEL_INFO, "Security Classes 검사", "보안 관련 문자열을 포함하는 클래스 이름을 검색하지 못했습니다.")
+			writer.startWriter("Security_Classes", LEVEL_INFO, u"Security Classes 검사", u"보안 관련 문자열을 포함하는 클래스 이름을 검색하지 못했습니다.")
 			
 	#------------------------------------------------------------------------------------------------------
 
@@ -1310,9 +1312,9 @@ def __analyze(writer, args) :
 		isMasterKeyVulnerability = True
 		
 	if isMasterKeyVulnerability :
-		writer.startWriter("MASTER_KEY", LEVEL_CRITICAL, "마스터 키 유형 I 취약성", "이 APK에는 마스터 키 유형 I 취약성이 있습니다.", None, "CVE-2013-4787")
+		writer.startWriter("MASTER_KEY", LEVEL_CRITICAL, u"마스터 키 유형 I 취약성", u"이 APK에는 마스터 키 유형 I 취약성이 있습니다.", None, "CVE-2013-4787")
 	else :
-		writer.startWriter("MASTER_KEY", LEVEL_INFO, "마스터 키 유형 I 취약성", "이 APK에는 마스터 키 유형 I 취약성이 없습니다.", None, "CVE-2013-4787")
+		writer.startWriter("MASTER_KEY", LEVEL_INFO, u"마스터 키 유형 I 취약성", u"이 APK에는 마스터 키 유형 I 취약성이 없습니다.", None, "CVE-2013-4787")
 
 	#------------------------------------------------------------------------------------------------------
 	# Certificate checking (Prerequisite: 1.directory name "tmp" available  2.keytool command is available)
@@ -1348,11 +1350,11 @@ def __analyze(writer, args) :
 
 	is_debug_open = a.is_debuggable()   #Check 'android:debuggable'
 	if is_debug_open:
-		writer.startWriter("DEBUGGABLE", LEVEL_CRITICAL, "Android Debug Mode 검사", 
-			"AndroidManifest.xml에서 DEBUG 모드가 ON(android:debugable=\"true\")입니다. 이것은 매우 위험합니다. 공격자는 로그캣을 통해 디버그 메시지를 탐지할 수 있습니다. 릴리스된 응용 프로그램인 경우 DEBUG 모드를 비활성화하십시오.", ["Debug"])
+		writer.startWriter("DEBUGGABLE", LEVEL_CRITICAL, u"Android Debug Mode 검사", 
+			u"AndroidManifest.xml에서 DEBUG 모드가 ON(android:debugable=\"true\")입니다. 이것은 매우 위험합니다. 공격자는 로그캣을 통해 디버그 메시지를 탐지할 수 있습니다. 릴리스된 응용 프로그램인 경우 DEBUG 모드를 비활성화하십시오.", ["Debug"])
 
 	else:
-		writer.startWriter("DEBUGGABLE", LEVEL_INFO, "Android Debug Mode 검사", "AndroidManifest.xml에서 DEBUG 모드가 OFF(android:debugable=\"false\")입니다.", ["Debug"])
+		writer.startWriter("DEBUGGABLE", LEVEL_INFO, u"Android Debug Mode 검사", u"AndroidManifest.xml에서 DEBUG 모드가 OFF(android:debugable=\"false\")입니다.", ["Debug"])
 
 	#------------------------------------------------------------------------------------------------------
 
@@ -1408,33 +1410,33 @@ def __analyze(writer, args) :
 					pass
 
 	if list_detected_FLAG_DEBUGGABLE_path :
-		writer.startWriter("HACKER_DEBUGGABLE_CHECK", LEVEL_NOTICE, "Checking Android Debug Mode 검사를 위한 코드", "AndroidManifest.xml에서 \"ApplicationInfo.FLAG_DEBUGGABLE\" 검사하는 코드를 발견:", ["Debug", "Hacker"])
+		writer.startWriter("HACKER_DEBUGGABLE_CHECK", LEVEL_NOTICE, u"Checking Android Debug Mode 검사를 위한 코드", u"AndroidManifest.xml에서 \"ApplicationInfo.FLAG_DEBUGGABLE\" 검사하는 코드를 발견:", ["Debug", "Hacker"])
 
 		for path in list_detected_FLAG_DEBUGGABLE_path:
 			writer.show_single_PathVariable(d, path)
 	else:
-		writer.startWriter("HACKER_DEBUGGABLE_CHECK", LEVEL_INFO, "Checking Android Debug Mode 검사를 위한 코드", "AndroidManifest.xml에서 \"ApplicationInfo.FLAG_DEBUGGABLE\" 검사하는 코드를 발견하지 못했습니다.", ["Debug", "Hacker"])
+		writer.startWriter("HACKER_DEBUGGABLE_CHECK", LEVEL_INFO, u"Checking Android Debug Mode 검사를 위한 코드", u"AndroidManifest.xml에서 \"ApplicationInfo.FLAG_DEBUGGABLE\" 검사하는 코드를 발견하지 못했습니다.", ["Debug", "Hacker"])
 
 	#----------------------------------------------------------------------------------
 
 	ACCESS_MOCK_LOCATION = "android.permission.ACCESS_MOCK_LOCATION"
 	if ACCESS_MOCK_LOCATION in all_permissions:
-		writer.startWriter("USE_PERMISSION_ACCESS_MOCK_LOCATION", LEVEL_CRITICAL, "불필요한 권한 검사", "권한 'android.permission.ACCESS_MOCK_LOCATION'은 에뮬레이터 환경에서만 작동합니다. 릴리스된 응용 프로그램인 경우 이 권한을 제거하십시오.")
+		writer.startWriter("USE_PERMISSION_ACCESS_MOCK_LOCATION", LEVEL_CRITICAL, u"불필요한 권한 검사", u"권한 'android.permission.ACCESS_MOCK_LOCATION'은 에뮬레이터 환경에서만 작동합니다. 릴리스된 응용 프로그램인 경우 이 권한을 제거하십시오.")
 	else:
-		writer.startWriter("USE_PERMISSION_ACCESS_MOCK_LOCATION", LEVEL_INFO, "불필요한 권한 검사", "권한 'android.permission.ACCESS_MOCK_LOCATION' 올바르게 설정되어 있습니다.")
+		writer.startWriter("USE_PERMISSION_ACCESS_MOCK_LOCATION", LEVEL_INFO, u"불필요한 권한 검사", u"권한 'android.permission.ACCESS_MOCK_LOCATION' 올바르게 설정되어 있습니다.")
 
 	#----------------------------------------------------------------------------------
 
 	permissionNameOfWrongPermissionGroup = a.get_permission_tag_wrong_settings_names()
 
 	if permissionNameOfWrongPermissionGroup:  #If the list is not empty
-		writer.startWriter("PERMISSION_GROUP_EMPTY_VALUE", LEVEL_CRITICAL, "AndroidManifest 권한그룹 검사", 
-			"'permissionGroup' 속성을 빈 값으로 설정하면 권한 정의가 잘못되어 다른 앱에서 권한을 사용할 수 없게 됩니다.")
+		writer.startWriter("PERMISSION_GROUP_EMPTY_VALUE", LEVEL_CRITICAL, u"AndroidManifest 권한그룹 검사", 
+			u"'permissionGroup' 속성을 빈 값으로 설정하면 권한 정의가 잘못되어 다른 앱에서 권한을 사용할 수 없게 됩니다.")
 
 		for name in permissionNameOfWrongPermissionGroup:
-			writer.write("권한 이름 `permissionGroup` 속성에 있는 '%s'이 빈 값으로 설정되어 있습니다." % (name))
+			writer.write(u"권한 이름 `permissionGroup` 속성에 있는 '%s'이 빈 값으로 설정되어 있습니다." % (name))
 	else:
-		writer.startWriter("PERMISSION_GROUP_EMPTY_VALUE", LEVEL_INFO, "AndroidManifest 권한그룹 검사", "PermissionGroup in permission tag of AndroidManifest sets correctly.")
+		writer.startWriter("PERMISSION_GROUP_EMPTY_VALUE", LEVEL_INFO, u"AndroidManifest 권한그룹 검사", u"PermissionGroup in permission tag of AndroidManifest sets correctly.")
 
 	#----------------------------------------------------------------------------------
 
@@ -1453,18 +1455,18 @@ def __analyze(writer, args) :
 	
 	if list_user_permission_critical_manufacturer or list_user_permission_critical:
 		if list_user_permission_critical_manufacturer:
-			writer.startWriter("USE_PERMISSION_SYSTEM_APP", LEVEL_CRITICAL, "AndroidManifest System 사용 권한 검사", "이 앱은 개발업체 또는 Google에서 릴리스하고 서명하며 '/system/app' 아래에 있어야 합니다. 그렇지 않으면 악성 앱일 수 있습니다.")
+			writer.startWriter("USE_PERMISSION_SYSTEM_APP", LEVEL_CRITICAL, u"AndroidManifest System 사용 권한 검사", u"이 앱은 개발업체 또는 Google에서 릴리스하고 서명하며 '/system/app' 아래에 있어야 합니다. 그렇지 않으면 악성 앱일 수 있습니다.")
 
 			for permission in list_user_permission_critical_manufacturer:
 				writer.write("System use-permission found: \"" + permission + "\"")
 
 		if list_user_permission_critical:
-			writer.startWriter("USE_PERMISSION_CRITICAL", LEVEL_CRITICAL, "AndroidManifest System 사용 권한 검사", "이 앱은 매우 높은 권한을 가지고 있습니다.")
+			writer.startWriter("USE_PERMISSION_CRITICAL", LEVEL_CRITICAL, u"AndroidManifest System 사용 권한 검사", u"이 앱은 매우 높은 권한을 가지고 있습니다.")
 
 			for permission in list_user_permission_critical:
 				writer.write("Critical use-permission found: \"" + permission + "\"")
 	else :
-		writer.startWriter("USE_PERMISSION_SYSTEM_APP", LEVEL_INFO, "AndroidManifest System 사용 권한 검사", "시스템의 중요한 사용 권한을 찾을 수 없습니다.")
+		writer.startWriter("USE_PERMISSION_SYSTEM_APP", LEVEL_INFO, u"AndroidManifest System 사용 권한 검사", u"시스템의 중요한 사용 권한을 찾을 수 없습니다.")
 
 	#----------------------------------------------------------------------------------
 
@@ -1475,13 +1477,13 @@ def __analyze(writer, args) :
 
 	if isSuggestGCM :
 
-		output_string = """minSdk의 버전: """ + str(int_min_sdk) + """
+		output_string = u"""minSdk의 버전: """ + str(int_min_sdk) + """
 You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있습니다. Google 클라우드 메시징(푸시 메시지) 서비스는 Android SDK > = 8(Android 2.2)만 허용합니다. 참조: http://developer.android.com/about/dashboards/index.html."""
-		writer.startWriter("MANIFEST_GCM", LEVEL_NOTICE, "Google 클라우드 메세지 제안", output_string)
+		writer.startWriter("MANIFEST_GCM", LEVEL_NOTICE, u"Google 클라우드 메세지 제안", output_string)
 
 	else :
 
-		writer.startWriter("MANIFEST_GCM", LEVEL_INFO, "Google 클라우드 메세지 제안", "제안사항이 없습니다.")
+		writer.startWriter("MANIFEST_GCM", LEVEL_INFO, u"Google 클라우드 메세지 제안", u"제안사항이 없습니다.")
 
 	#------------------------------------------------------------------------------------------------------
 	#Find network methods:
@@ -1513,12 +1515,12 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 	if pkg_URLConnection or pkg_HttpURLConnection or pkg_HttpsURLConnection or pkg_DefaultHttpClient or pkg_HttpClient:
 
 		if "android.permission.INTERNET" in all_permissions:
-			writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_INFO, "인터넷 접근 검사", 
-						"이 앱은 HTTP 프로토콜을 통해 인터넷을 사용하고 있습니다.")
+			writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_INFO, u"인터넷 접근 검사", 
+						u"이 앱은 HTTP 프로토콜을 통해 인터넷을 사용하고 있습니다.")
 
 		else:
-			writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_CRITICAL, "인터넷 접근 검사", 
-						"이 앱에는 일부 인터넷 액세스 코드가 있지만 AndroidManifest안에 있는 'android.permission.INTERNET'이 설정되어 있지 않습니다.")
+			writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_CRITICAL, u"인터넷 접근 검사", 
+						u"이 앱에는 일부 인터넷 액세스 코드가 있지만 AndroidManifest안에 있는 'android.permission.INTERNET'이 설정되어 있지 않습니다.")
 
 		# if pkg_URLConnection:
 		# 	print("        =>URLConnection:")
@@ -1542,7 +1544,7 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 		# 	print
 
 	else:
-		writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_INFO, "인터넷 접근 검사", "HTTP 관련 연결 코드를 찾을 수 없습니다.")
+		writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_INFO, u"인터넷 접근 검사", u"HTTP 관련 연결 코드를 찾을 수 없습니다.")
 
 	# ------------------------------------------------------------------------
 
@@ -1563,12 +1565,12 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 
 		list_base64_decoded_urls = {}
 
-		writer.startWriter("HACKER_BASE64_STRING_DECODE", LEVEL_CRITICAL, "Base64 문자열 인코딩", "Found Base64 인코딩 발견 \"String(s)\" (총: " + str(len(organized_list_base64_success_decoded_string_to_original_mapping)) + "). We cannot guarantee all of the Strings are Base64 encoding and also we will not show you the decoded binary file:", ["Hacker"])
+		writer.startWriter("HACKER_BASE64_STRING_DECODE", LEVEL_CRITICAL, u"Base64 문자열 인코딩", u"Found Base64 인코딩 발견 \"String(s)\" (총: " + str(len(organized_list_base64_success_decoded_string_to_original_mapping)) + "). We cannot guarantee all of the Strings are Base64 encoding and also we will not show you the decoded binary file:", ["Hacker"])
 
 		for decoded_string, original_string, dict_class_to_method_mapping in organized_list_base64_success_decoded_string_to_original_mapping : 
 
 			writer.write(decoded_string)
-			writer.write("    ->원본 인코딩 문자열: " + original_string)
+			writer.write(u"    ->원본 인코딩 문자열: " + original_string)
 			
 			if dict_class_to_method_mapping :
 				for class_name, result_method_list in dict_class_to_method_mapping.items() :
@@ -1581,7 +1583,7 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 
 		if list_base64_decoded_urls :
 
-			writer.startWriter("HACKER_BASE64_URL_DECODE", LEVEL_CRITICAL, "Base64 문자열 인코딩", "모든 문자열로 부터 Base64 인코딩 \"HTTP URLs without SSL\" (총: " + str(len(list_base64_decoded_urls)) + ")", ["SSL_Security", "Hacker"])
+			writer.startWriter("HACKER_BASE64_URL_DECODE", LEVEL_CRITICAL, u"Base64 문자열 인코딩", u"모든 문자열로 부터 Base64 인코딩 \"HTTP URLs without SSL\" (총: " + str(len(list_base64_decoded_urls)) + ")", ["SSL_Security", "Hacker"])
 
 			for decoded_string, original_string in list_base64_decoded_urls.items():
 
@@ -1591,7 +1593,7 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 					continue
 
 				writer.write(decoded_string)
-				writer.write("    ->원본 인코딩 문자열: " + original_string)
+				writer.write(u"    ->원본 인코딩 문자열: " + original_string)
 
 				if dict_class_to_method_mapping :
 					for class_name, result_method_list in dict_class_to_method_mapping.items() :
@@ -1600,7 +1602,7 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 							writer.write("    ->From class: " + source_classes_and_functions)
 
 	else:
-		writer.startWriter("HACKER_BASE64_STRING_DECODE", LEVEL_INFO, "Base64 문자열 인코딩", "인코딩된 Base64 문자열 또는 URL을 찾을 수 없습니다.", ["Hacker"])
+		writer.startWriter("HACKER_BASE64_STRING_DECODE", LEVEL_INFO, u"Base64 문자열 인코딩", u"인코딩된 Base64 문자열 또는 URL을 찾을 수 없습니다.", ["Hacker"])
 
 	# ------------------------------------------------------------------------
 	#WebView addJavascriptInterface checking:
@@ -1611,7 +1613,7 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 
 	if path_WebView_addJavascriptInterface:
 
-		output_string = """중요한 WebView "addJavascriptInterface"취약성을 찾았습니다. 이 메서드를 사용하여 JavaScript가 호스트 응용 프로그램을 제어할 수 있습니다. 
+		output_string = u"""중요한 WebView "addJavascriptInterface"취약성을 찾았습니다. 이 메서드를 사용하여 JavaScript가 호스트 응용 프로그램을 제어할 수 있습니다. 
 이것은 강력한 기능이지만 자바스크립트가 삽입된 객체의 공개 필드에 접근하기 위해 반사를 사용할 수 있기 때문에 API 수준 JELLY_BEAN(4.2) 이하를 대상으로 하는 애플리케이션의 보안 위험도 있다. 신뢰할 수 없는 콘텐츠를 포함하는 WebView에서 이 메서드를 사용하면 공격자가 의도하지 않은 방법으로 호스트 응용 프로그램을 조작하여 호스트 응용 프로그램의 권한으로 Java 코드를 실행할 수 있습니다.
 참조: 
   1."http://developer.android.com/reference/android/webkit/WebView.html#addJavascriptInterface(java.lang.Object, java.lang.String) "
@@ -1620,12 +1622,12 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
   4.http://blog.trustlook.com/2013/09/04/alert-android-webview-addjavascriptinterface-code-execution-vulnerability/
 아래 코드를 수정해 주십시오.:"""
 
-		writer.startWriter("WEBVIEW_RCE", LEVEL_CRITICAL, "WebView RCE 취약점 검사", output_string, ["WebView", "Remote Code Execution"], "CVE-2013-4710")
+		writer.startWriter("WEBVIEW_RCE", LEVEL_CRITICAL, u"WebView RCE 취약점 검사", output_string, ["WebView", "Remote Code Execution"], "CVE-2013-4710")
 		writer.show_Paths(d, path_WebView_addJavascriptInterface)
 
 	else:
 
-		writer.startWriter("WEBVIEW_RCE", LEVEL_INFO, "WebView RCE 취약점 검사", "WebView addJavascriptInterface 취약점을 찾을 수 없습니다.", ["WebView", "Remote Code Execution"], "CVE-2013-4710")
+		writer.startWriter("WEBVIEW_RCE", LEVEL_INFO, u"WebView RCE 취약점 검사", u"WebView addJavascriptInterface 취약점을 찾을 수 없습니다.", ["WebView", "Remote Code Execution"], "CVE-2013-4710")
 
 	# ------------------------------------------------------------------------
 	#KeyStore null PWD checking:
@@ -1654,30 +1656,30 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 
 	if (not list_no_pwd_keystore) and (not list_protected_keystore) and (not list_no_pwd_probably_ssl_pinning_keystore):
 
-		writer.startWriter("HACKER_KEYSTORE_NO_PWD", LEVEL_INFO, "KeyStore 보호 검사", 
-			"키스토어를 사용하지 않기 때문에 암호로 보호되는 키스토어 확인을 무시하십시오.", ["KeyStore", "Hacker"])
+		writer.startWriter("HACKER_KEYSTORE_NO_PWD", LEVEL_INFO, u"KeyStore 보호 검사", 
+			u"키스토어를 사용하지 않기 때문에 암호로 보호되는 키스토어 확인을 무시하십시오.", ["KeyStore", "Hacker"])
 
 	else:
 		if list_no_pwd_probably_ssl_pinning_keystore:
 
-			writer.startWriter("HACKER_KEYSTORE_SSL_PINNING", LEVEL_CRITICAL, "KeyStore 보호 검사", 
-				"아래의 키 저장소는 SSL 고정 작업을 위해 \"byte array\" 또는 \"hard-coded cert info\"를 사용하는 것 같습니다. (총: " + str(len(list_no_pwd_probably_ssl_pinning_keystore)) + "). 수동으로 확인하십시오:", ["KeyStore", "Hacker"])
+			writer.startWriter("HACKER_KEYSTORE_SSL_PINNING", LEVEL_CRITICAL, u"KeyStore 보호 검사", 
+				u"아래의 키 저장소는 SSL 고정 작업을 위해 \"byte array\" 또는 \"hard-coded cert info\"를 사용하는 것 같습니다. (총: " + str(len(list_no_pwd_probably_ssl_pinning_keystore)) + "). 수동으로 확인하십시오:", ["KeyStore", "Hacker"])
 
 			for keystore in list_no_pwd_probably_ssl_pinning_keystore:
 				writer.show_Path(d, keystore)
 
 		if list_no_pwd_keystore:
 
-			writer.startWriter("HACKER_KEYSTORE_NO_PWD", LEVEL_CRITICAL, "KeyStore 보호 검사", 
-				"아래 키 저장소는 암호로 보호되는 \"NOT\"인 것 같습니다. (총: " + str(len(list_no_pwd_keystore)) + "). 수동으로 확인하십시오:", ["KeyStore", "Hacker"])
+			writer.startWriter("HACKER_KEYSTORE_NO_PWD", LEVEL_CRITICAL, u"KeyStore 보호 검사", 
+				u"아래 키 저장소는 암호로 보호되는 \"NOT\"인 것 같습니다. (총: " + str(len(list_no_pwd_keystore)) + "). 수동으로 확인하십시오:", ["KeyStore", "Hacker"])
 
 			for keystore in list_no_pwd_keystore:
 				writer.show_Path(d, keystore)
 
 		if list_protected_keystore:
 			
-			writer.startWriter("HACKER_KEYSTORE_SSL_PINNING2", LEVEL_NOTICE, "KeyStore 보호 검사", 
-				"아래의 키 저장소는 암호로 \"protected\"되어 있으며 SSL-pinning을 사용하는 것 같습니다. (총: " + str(len(list_protected_keystore)) + "). \"Portecle\" 도구를 사용하여 KeyStore의 인증서를 관리할 수 있습니다:", ["KeyStore", "Hacker"])
+			writer.startWriter("HACKER_KEYSTORE_SSL_PINNING2", LEVEL_NOTICE, u"KeyStore 보호 검사", 
+				u"아래의 키 저장소는 암호로 \"protected\"되어 있으며 SSL-pinning을 사용하는 것 같습니다. (총: " + str(len(list_protected_keystore)) + "). \"Portecle\" 도구를 사용하여 KeyStore의 인증서를 관리할 수 있습니다:", ["KeyStore", "Hacker"])
 
 			for keystore in list_protected_keystore:
 				writer.show_Path(d, keystore)
@@ -1704,17 +1706,17 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 
 	if list_keystore_file_name or list_possible_keystore_file_name :
 		if list_keystore_file_name :
-			writer.startWriter("HACKER_KEYSTORE_LOCATION1", LEVEL_NOTICE, "KeyStore 파일 위치", "BKS Keystore 파일:", ["KeyStore", "Hacker"])
+			writer.startWriter("HACKER_KEYSTORE_LOCATION1", LEVEL_NOTICE, u"KeyStore 파일 위치", u"BKS Keystore 파일:", ["KeyStore", "Hacker"])
 			for i in list_keystore_file_name:
 				writer.write(i)
 
 		if list_possible_keystore_file_name:
-			writer.startWriter("HACKER_KEYSTORE_LOCATION2", LEVEL_NOTICE, "가능성있는 KeyStore 파일 위치", "가능성있는 BKS keystore 파일:", ["KeyStore", "Hacker"])
+			writer.startWriter("HACKER_KEYSTORE_LOCATION2", LEVEL_NOTICE, u"가능성있는 KeyStore 파일 위치", u"가능성있는 BKS keystore 파일:", ["KeyStore", "Hacker"])
 			for i in list_possible_keystore_file_name:
 				writer.write(i)
 	else :
-		writer.startWriter("HACKER_KEYSTORE_LOCATION1", LEVEL_INFO, "KeyStore 파일 위치", 
-			"가능성있는 BKS 키 저장소 또는 인증서 키 저장소 파일을 찾지 못했습니다(알림: 이 앱이 keystore를 사용하지 않는 것은 아닙니다.):", ["KeyStore", "Hacker"])
+		writer.startWriter("HACKER_KEYSTORE_LOCATION1", LEVEL_INFO, u"KeyStore 파일 위치", 
+			u"가능성있는 BKS 키 저장소 또는 인증서 키 저장소 파일을 찾지 못했습니다(알림: 이 앱이 keystore를 사용하지 않는 것은 아닙니다.):", ["KeyStore", "Hacker"])
 
 	# ------------------------------------------------------------------------
 	#BKS KeyStore checking:
@@ -1735,11 +1737,11 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 			list_Non_BKS_keystore.append(i.getPath())
 
 	if list_Non_BKS_keystore:
-		writer.startWriter("KEYSTORE_TYPE_CHECK", LEVEL_CRITICAL, "KeyStore Type 검사", "Android는 'BKS' 유형 KeyStore만 허용합니다. 'BKS' 유형 키스토어를 사용하고 있는지 확인하십시오.:", ["KeyStore"])
+		writer.startWriter("KEYSTORE_TYPE_CHECK", LEVEL_CRITICAL, u"KeyStore Type 검사", u"Android는 'BKS' 유형 KeyStore만 허용합니다. 'BKS' 유형 키스토어를 사용하고 있는지 확인하십시오.:", ["KeyStore"])
 		for keystore in list_Non_BKS_keystore:
 			writer.show_Path(d, keystore)
 	else:
-		writer.startWriter("KEYSTORE_TYPE_CHECK", LEVEL_INFO, "KeyStore Type 검사", "키 저장소 'BKS' type OK", ["KeyStore"])
+		writer.startWriter("KEYSTORE_TYPE_CHECK", LEVEL_INFO, u"KeyStore Type 검사", u"키 저장소 'BKS' 좋음", ["KeyStore"])
 
 	# ------------------------------------------------------------------------
 	#Android PackageInfo signatures checking:
@@ -1764,12 +1766,12 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 			list_PackageInfo_signatures.append(i.getPath())
 
 	if list_PackageInfo_signatures:
-		writer.startWriter("HACKER_SIGNATURE_CHECK", LEVEL_NOTICE, "서명 코드 가져오기 검사", 
-			"이 앱은 코드에 패키지 서명을 확인하는 코드가 있습니다. 공격자들에 의해 앱이 해킹당했는지 확인하기 위해 사용될 수 있습니다.", ["Signature", "Hacker"])
+		writer.startWriter("HACKER_SIGNATURE_CHECK", LEVEL_NOTICE, u"서명 코드 가져오기 검사", 
+			u"이 앱은 코드에 패키지 서명을 확인하는 코드가 있습니다. 공격자들에 의해 앱이 해킹당했는지 확인하기 위해 사용될 수 있습니다.", ["Signature", "Hacker"])
 		for signature in list_PackageInfo_signatures:
 			writer.show_Path(d, signature)
 	else:
-		writer.startWriter("HACKER_SIGNATURE_CHECK", LEVEL_INFO, "서명 코드 가져오기 검사", "이 앱이 코드에서 서명을 확인하는 것을 감지하지 못했습니다.", ["Signature", "Hacker"])
+		writer.startWriter("HACKER_SIGNATURE_CHECK", LEVEL_INFO, u"서명 코드 가져오기 검사", u"이 앱이 코드에서 서명을 확인하는 것을 감지하지 못했습니다.", ["Signature", "Hacker"])
 
 	# ------------------------------------------------------------------------
 	#Developers preventing screenshot capturing checking:
@@ -1798,14 +1800,14 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 			list_code_for_preventing_screen_capture.append(i.getPath())
 
 	if list_code_for_preventing_screen_capture:
-		writer.startWriter("HACKER_PREVENT_SCREENSHOT_CHECK", LEVEL_NOTICE, "스크린샷 캡처 방지", 
-			"""이 앱에는 캡처를 방지하는 코드가 설정되어 있습니다.
+		writer.startWriter("HACKER_PREVENT_SCREENSHOT_CHECK", LEVEL_NOTICE, u"스크린샷 캡처 방지", 
+			u"""이 앱에는 캡처를 방지하는 코드가 설정되어 있습니다.
 예시: getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
 개발자가 앱을 보호하기 위해 사용합니다.:""", ["Hacker"])
 		for interesting_code in list_code_for_preventing_screen_capture:
 			writer.show_Path(d, interesting_code)
 	else:
-		writer.startWriter("HACKER_PREVENT_SCREENSHOT_CHECK", LEVEL_INFO, "스크린샷 캡처 방지", "이 앱에 스크린샷 캡처를 차단하는 코드 설정이 있는지 탐지하지 못했습니다.", ["Hacker"])
+		writer.startWriter("HACKER_PREVENT_SCREENSHOT_CHECK", LEVEL_INFO, u"스크린샷 캡처 방지", u"이 앱에 스크린샷 캡처를 차단하는 코드 설정이 있는지 탐지하지 못했습니다.", ["Hacker"])
 
 
 	# ------------------------------------------------------------------------
@@ -1833,17 +1835,17 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 			list_Runtime_exec.append(i.getPath())
 
 	if path_Runtime_exec:
-		writer.startWriter("COMMAND", LEVEL_CRITICAL, "Runtime exec 검사", "이 앱은 critical한 함수 'Runtime.getRuntime().exec(\"...\")'를 사용하고있습니다.\n다음 코드 세션이 유해하지 않은지 확인하십시오:", ["Command"])
+		writer.startWriter("COMMAND", LEVEL_CRITICAL, u"Runtime exec 검사", u"이 앱은 critical한 함수 'Runtime.getRuntime().exec(\"...\")'를 사용하고있습니다.\n다음 코드 세션이 유해하지 않은지 확인하십시오:", ["Command"])
 
 		writer.show_Paths(d, path_Runtime_exec)
 
 		if list_Runtime_exec :
-			writer.startWriter("COMMAND_SU", LEVEL_CRITICAL, "Runtime Critical Command 검사", "\"root\" 권한 코드 섹션 'Runtime.getRuntime(.exec(\"su\")'에 대한 요청 중입니다:", ["Command"])
+			writer.startWriter("COMMAND_SU", LEVEL_CRITICAL, u"Runtime Critical Command 검사", u"\"root\" 권한 코드 섹션 'Runtime.getRuntime(.exec(\"su\")'에 대한 요청 중입니다:", ["Command"])
 
 			for path in list_Runtime_exec:
 				writer.show_Path(d, path)
 	else:
-		writer.startWriter("COMMAND", LEVEL_INFO, "Runtime Command 검사", "이 앱은 critical한 함수 'Runtime.getRuntime().exec(\"...\")'를 사용하고 있지 않습니다.", ["Command"])
+		writer.startWriter("COMMAND", LEVEL_INFO, u"Runtime Command 검사", u"이 앱은 critical한 함수 'Runtime.getRuntime().exec(\"...\")'를 사용하고 있지 않습니다.", ["Command"])
 
 	# -------------------------------------------------------
 
@@ -1892,7 +1894,7 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 
 	if list_HOSTNAME_INNER_VERIFIER :
 
-		output_string = """이 앱을 사용하면 자체 정의 호스트 이름 확인기가 모든 Common Names(CN)을 수락할 수 있습니다. 
+		output_string = u"""이 앱을 사용하면 자체 정의 호스트 이름 확인기가 모든 Common Names(CN)을 수락할 수 있습니다. 
 이 취약성을 통해 공격자는 사용자가 모르게 유효한 인증서로 MITM 공격을 수행할 수 있습니다. 
 사례: 
 (1)http://osvdb.org/96411 
@@ -1908,7 +1910,7 @@ Google Chrome을 사용하여 탐색:
 
 다음 메서드의 코드를 확인하십시오.:"""
 
-		writer.startWriter("SSL_CN1", LEVEL_CRITICAL, "SSL 구현 검사(사용자 지정 클래스에서 호스트 이름 확인)", output_string, ["SSL_Security"])
+		writer.startWriter("SSL_CN1", LEVEL_CRITICAL, u"SSL 구현 검사(사용자 지정 클래스에서 호스트 이름 확인)", output_string, ["SSL_Security"])
 
 
 		for method in list_HOSTNAME_INNER_VERIFIER :
@@ -1919,7 +1921,7 @@ Google Chrome을 사용하여 탐색:
 			if method_class_name in dic_path_HOSTNAME_INNER_VERIFIER_new_instance:
 				writer.show_Paths(d, dic_path_HOSTNAME_INNER_VERIFIER_new_instance[method_class_name])
 	else :
-		writer.startWriter("SSL_CN1", LEVEL_INFO, "SSL 구현 검사(사용자 지정 클래스에서 호스트  확인)", "자체 정의된 HOSTNAME VERIFIER 검사 확인.", ["SSL_Security"])
+		writer.startWriter("SSL_CN1", LEVEL_INFO, u"SSL 구현 검사(사용자 지정 클래스에서 호스트  확인)", u"자체 정의된 HOSTNAME VERIFIER 검사 확인.", ["SSL_Security"])
 
 
 	# (2)ALLOW_ALL_HOSTNAME_VERIFIER fields checking
@@ -1939,7 +1941,7 @@ Google Chrome을 사용하여 탐색:
 
 	if path_HOSTNAME_INNER_VERIFIER_new_instance or filtered_ALLOW_ALL_HOSTNAME_VERIFIER_paths :
 		
-		output_string = """이 앱을 사용하면 자체 정의 호스트 이름 확인기가 모든 Common Names(CN)을 수락할 수 있습니다. 
+		output_string = u"""이 앱을 사용하면 자체 정의 호스트 이름 확인기가 모든 Common Names(CN)을 수락할 수 있습니다. 
 이 취약성을 통해 공격자는 사용자가 모르게 유효한 인증서로 MITM 공격을 수행할 수 있습니다. 
 사례: 
 (1)http://osvdb.org/96411 
@@ -1955,7 +1957,7 @@ Google Chrome을 사용하여 탐색:
 
 다음 메서드의 코드를 확인하십시오.:"""
 
-		writer.startWriter("SSL_CN2", LEVEL_CRITICAL, "SSL 구현 검사(필드에서 호스트 이름 확인)", output_string, ["SSL_Security"])
+		writer.startWriter("SSL_CN2", LEVEL_CRITICAL, u"SSL 구현 검사(필드에서 호스트 이름 확인)", output_string, ["SSL_Security"])
 
 		if filtered_ALLOW_ALL_HOSTNAME_VERIFIER_paths :
 			"""
@@ -1976,7 +1978,7 @@ Google Chrome을 사용하여 탐색:
 			#For this one, the exclusion procedure is done on earlier
 			writer.show_Paths(d, path_HOSTNAME_INNER_VERIFIER_new_instance)
 	else :
-		writer.startWriter("SSL_CN2", LEVEL_INFO, "SSL 구현 검사(필드에서 호스트 이름 확인)", "심각한 취약성 \"ALLOW_ALL_HOSTNAME_VERIFFER\" 필드 설정 또는 \"AllowAllHostnameVerifier\" 클래스 인스턴스를 찾을 수 없습니다.", ["SSL_Security"])
+		writer.startWriter("SSL_CN2", LEVEL_INFO, u"SSL 구현 검사(필드에서 호스트 이름 확인)", u"심각한 취약성인 \"ALLOW_ALL_HOSTNAME_VERIFFER\" 필드 설정 또는 \"AllowAllHostnameVerifier\" 클래스 인스턴스를 찾을 수 없습니다.", ["SSL_Security"])
 
 	# -------------------------------------------------------
 
@@ -1988,14 +1990,14 @@ Google Chrome을 사용하여 탐색:
 
 	if path_getInsecure:
 
-		output_string = """이 팩토리를 사용하여 만든 소켓(안전하지 않은 메서드 "getInsecure")은 man-in-the-middle attacks에 취약합니다. 
+		output_string = u"""이 팩토리를 사용하여 만든 소켓(안전하지 않은 메서드 "getInsecure")은 man-in-the-middle attacks에 취약합니다. 
 참조를 확인하십시오: http://developer.android.com/reference/android/net/SSLCertificateSocketFactory.html#getInsecure(int, android.net.SSLSessionCache). 
 안전하지 않은 코드를 제거하십시오.:"""
 
-		writer.startWriter("SSL_CN3", LEVEL_CRITICAL, "SSL 구현 검사(필드에서 호스트 이름 확인)", output_string, ["SSL_Security"])
+		writer.startWriter("SSL_CN3", LEVEL_CRITICAL, u"SSL 구현 검사(필드에서 호스트 이름 확인)", output_string, ["SSL_Security"])
 		writer.show_Paths(d, path_getInsecure)
 	else:
-		writer.startWriter("SSL_CN3", LEVEL_INFO, "SSL 구현 검사(필드에서 호스트 이름 확인)", "안전하지 않은 메서드 \"getInsecure\"로 SSLocketFactory를 검색하지 못했습니다.", ["SSL_Security"])
+		writer.startWriter("SSL_CN3", LEVEL_INFO, u"SSL 구현 검사(필드에서 호스트 이름 확인)", u"안전하지 않은 메서드 \"getInsecure\"로 SSLocketFactory를 검색하지 못했습니다.", ["SSL_Security"])
 
 	# -------------------------------------------------------
 
@@ -2023,13 +2025,13 @@ Google Chrome을 사용하여 탐색:
 			list_HttpHost_scheme_http.append(i.getPath())
 
 	if list_HttpHost_scheme_http:
-		writer.startWriter("SSL_DEFAULT_SCHEME_NAME", LEVEL_CRITICAL, "SSL 구현 검사(HttpHost)", 
-			"이 앱은 \"HttpHost\"를 사용하지만 기본 체계는 \"Http\" 또는 \"HttpHost\"입니다.DEFAULT_SCHEME_NAME(http)\"입니다. \"https\"로 변경하십시오.:", ["SSL_Security"])
+		writer.startWriter("SSL_DEFAULT_SCHEME_NAME", LEVEL_CRITICAL, u"SSL 구현 검사(HttpHost)", 
+			u"이 앱은 \"HttpHost\"를 사용하지만 기본 체계는 \"Http\" 또는 \"HttpHost\"입니다.DEFAULT_SCHEME_NAME(http)\"입니다. \"https\"로 변경하십시오.:", ["SSL_Security"])
 
 		for i in list_HttpHost_scheme_http:
 			writer.show_Path(d, i)
 	else:
-		writer.startWriter("SSL_DEFAULT_SCHEME_NAME", LEVEL_INFO, "SSL 구현 검사(HttpHost)", "HttpHost위한 DEFAULT_SCHEME_NAME 검사: OK", ["SSL_Security"])
+		writer.startWriter("SSL_DEFAULT_SCHEME_NAME", LEVEL_INFO, u"SSL 구현 검사(HttpHost)", u"HttpHost위한 DEFAULT_SCHEME_NAME 검사: OK", ["SSL_Security"])
 
 	# ------------------------------------------------------------------------
 	#WebViewClient onReceivedSslError errors
@@ -2048,8 +2050,8 @@ Google Chrome을 사용하여 탐색:
 	list_webviewClient = filteringEngine.filter_list_of_methods(list_webviewClient)
 
 	if list_webviewClient :
-		writer.startWriter("SSL_WEBVIEW", LEVEL_CRITICAL, "SSL 구현 검사(WebView위한 WebViewClient)", 
-			"""SSL 인증서가 잘못된 경우에도 연결을 허용하는 확장 "WebViewClient"의 메서드 내에서 "handler.proceed();"를 사용하지 마십시오(MITM 취약성).
+		writer.startWriter("SSL_WEBVIEW", LEVEL_CRITICAL, u"SSL 구현 검사(WebView위한 WebViewClient)", 
+			u"""SSL 인증서가 잘못된 경우에도 연결을 허용하는 확장 "WebViewClient"의 메서드 내에서 "handler.proceed();"를 사용하지 마십시오(MITM 취약성).
 참조:
 (1)WebView 공격: https://www.iseclab.org/papers/webview_leet13.pdf 
 (2)OWASP Mobile Top 10 문서: https://www.owasp.org/index.php/Mobile_Top_10_2014-M3
@@ -2066,7 +2068,7 @@ Google Chrome을 사용하여 탐색:
 				writer.show_Paths(d, dic_webviewClient_new_instance[method_class_name])
 
 	else :
-		writer.startWriter("SSL_WEBVIEW", LEVEL_INFO, "SSL 구현 검사(WebView위한 WebViewClient)", "\"WebViewClient\"(MITM 취약성)의 중요한 사용을 탐지하지 못했습니다.", ["SSL_Security"])
+		writer.startWriter("SSL_WEBVIEW", LEVEL_INFO, u"SSL 구현 검사(WebView위한 WebViewClient)", u"\"WebViewClient\"(MITM 취약성)의 중요한 사용을 탐지하지 못했습니다.", ["SSL_Security"])
 
 
 	# ------------------------------------------------------------------------
@@ -2094,12 +2096,12 @@ Google Chrome을 사용하여 탐색:
 			list_setJavaScriptEnabled_XSS.append(i.getPath())
 
 	if list_setJavaScriptEnabled_XSS:
-		writer.startWriter("WEBVIEW_JS_ENABLED", LEVEL_WARNING, "WebView XSS 공격 검사", 
-			"WebView에서 \"set JavaScriptEnabled(true)\"를 발견했으며 잠재적인 XSS 공격에 노출될 수 있습니다. 웹 페이지 코드를 주의 깊게 확인하고 출력을 삭제하십시오.", ["WebView"])
+		writer.startWriter("WEBVIEW_JS_ENABLED", LEVEL_WARNING, u"WebView XSS 공격 검사", 
+			u"WebView에서 \"set JavaScriptEnabled(true)\"를 발견했으며 잠재적인 XSS 공격에 노출될 수 있습니다. 웹 페이지 코드를 주의 깊게 확인하고 출력을 삭제하십시오.", ["WebView"])
 		for i in list_setJavaScriptEnabled_XSS:
 			writer.show_Path(d, i)
 	else:
-		writer.startWriter("WEBVIEW_JS_ENABLED", LEVEL_INFO, "WebView XSS 공격 검사", "WebView에서 \"set JavaScriptEnabled(true)\"를 검색하지 못했습니다.", ["WebView"])
+		writer.startWriter("WEBVIEW_JS_ENABLED", LEVEL_INFO, u"WebView XSS 공격 검사", u"WebView에서 \"set JavaScriptEnabled(true)\"를 검색하지 못했습니다.", ["WebView"])
 
 	# ------------------------------------------------------------------------
 	#HttpURLConnection bug checking:
@@ -2145,38 +2147,38 @@ Google Chrome을 사용하여 탐색:
 
 			if has_http_keepAlive_Name:
 				if has_http_keepAlive_Value:
-					writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_INFO, "HttpURLConnection Android 버그 검사", 
-						"시스템 속성 \"HttpURLConnection\"에 대한 \"http.keepAlive\"가 올바르게 설정되었습니다.")
+					writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_INFO, u"HttpURLConnection Android 버그 검사", 
+						u"시스템 속성 \"HttpURLConnection\"에 대한 \"http.keepAlive\"가 올바르게 설정되었습니다.")
 
 				else:
-					output_string = """시스템 속성 "HttpURLConnection"를 설정해야 합니다."http.keepAlive"를 "false"으로 유지하다
+					output_string = u"""시스템 속성 "HttpURLConnection"를 설정해야 합니다."http.keepAlive"를 "false"으로 유지하다
 "HttpURLConnection"을 사용하고 있습니다. 안드로이드 2.2(Froyo) 이전 버전에는 버그가 몇 가지 있습니다. 
 특히 읽을 수 있는 InputStream에서 close()를 호출하면 연결 풀에 독이 발생할 수 있습니다. 연결 풀링을 사용하지 않도록 설정하여 이 문제를 해결하십시오.
 참조를 확인하십시오.:
  (1)http://developer.android.com/reference/java/net/HttpURLConnection.html
  (2)http://android-developers.blogspot.tw/2011/09/androids-http-clients.html"""
-					writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_NOTICE, "HttpURLConnection Android 버그 검사", output_string)
+					writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_NOTICE, u"HttpURLConnection Android 버그 검사", output_string)
 
 					writer.show_Paths(d, list_pre_Froyo_HttpURLConnection)     #Notice: list_pre_Froyo_HttpURLConnection
 			else:
-				output_string = """시스템 속성 "HttpURLConnection"를 설정해야 합니다."http.keepAlive"를 "false"으로 유지하다
+				output_string = u"""시스템 속성 "HttpURLConnection"를 설정해야 합니다."http.keepAlive"를 "false"으로 유지하다
 "HttpURLConnection"을 사용하고 있습니다. 안드로이드 2.2(Froyo) 이전 버전에는 버그가 몇 가지 있습니다. 
 특히 읽을 수 있는 InputStream에서 close()를 호출하면 연결 풀에 독이 발생할 수 있습니다. 연결 풀링을 사용하지 않도록 설정하여 이 문제를 해결하십시오.
 참조를 확인하십시오.: 
  (1)http://developer.android.com/reference/java/net/HttpURLConnection.html
  (2)http://android-developers.blogspot.tw/2011/09/androids-http-clients.html"""
 
-				writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_NOTICE, "HttpURLConnection Android 버그 검사", output_string)
+				writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_NOTICE, u"HttpURLConnection Android 버그 검사", output_string)
 				#Make it optional to list library
 				writer.show_Paths(d, pkg_HttpURLConnection)   #Notice: pkg_HttpURLConnection
 
 		else:
-			writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_INFO, "HttpURLConnection Android 버그 검사", 
-						"\"HttpURLConnection\"를 사용하지 않기 떄문에 \"http.keepAlive\"검사를 무시합니다.")
+			writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_INFO, u"HttpURLConnection Android 버그 검사", 
+						u"\"HttpURLConnection\"를 사용하지 않기 때문에 \"http.keepAlive\"검사를 무시합니다.")
 
 	else:
-		writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_INFO, "HttpURLConnection Android Bug Checking", 
-			"\"HttpURLConnection\"를 사용하지 않기 떄문에 \"http.keepAlive\"검사를 무시하고 Sdk의 8버전이상 입니다.")
+		writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_INFO, u"HttpURLConnection Android Bug Checking", 
+			u"\"HttpURLConnection\"를 사용하지 않기 때문에 \"http.keepAlive\"검사를 무시하고 Sdk의 8버전이상 입니다.")
 
 	# ------------------------------------------------------------------------
 	# SQLiteDatabase - beginTransactionNonExclusive() checking:
@@ -2188,16 +2190,16 @@ Google Chrome을 사용하여 탐색:
 
 		if path_SQLiteDatabase_beginTransactionNonExclusive :
 			output_string = StringHandler()
-			output_string.append("\"SQLiteDatabase\"에서 \"beginTransactionNonExclusive\"를 사용 중이지만 minSdk는 " + str(int_min_sdk) + "아래를 지원합니다.")
-			output_string.append("\"beginTransactionNonExclusive\"는 API < 11에서 지원되지 않습니다. 이전 버전의 Android에서 \"beginTransaction\"을 사용해야 합니다.")
-			output_string.append("참조: http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html#beginTransactionNonExclusive()")
-			writer.startWriter("DB_DEPRECATED_USE1", LEVEL_CRITICAL, "SQLiteDatabase Transaction 반대 검사", output_string.get(), ["Database"])
+			output_string.append(u"\"SQLiteDatabase\"에서 \"beginTransactionNonExclusive\"를 사용 중이지만 minSdk는 " + str(int_min_sdk) + u"아래를 지원합니다.")
+			output_string.append(u"\"beginTransactionNonExclusive\"는 API < 11에서 지원되지 않습니다. 이전 버전의 Android에서 \"beginTransaction\"을 사용해야 합니다.")
+			output_string.append(u"참조: http://developer.android.com/reference/android/database/sqlite/SQLiteDatabase.html#beginTransactionNonExclusive()")
+			writer.startWriter("DB_DEPRECATED_USE1", LEVEL_CRITICAL, u"SQLiteDatabase Transaction 반대 검사", output_string.get(), ["Database"])
 
 			writer.show_Paths(d, path_SQLiteDatabase_beginTransactionNonExclusive)
 		else:
-			writer.startWriter("DB_DEPRECATED_USE1", LEVEL_INFO, "SQLiteDatabase Transaction 반대 검사", "\"SQLiteDatabase:beginTransactionNonExclusive\"을 사용하고 있지 않습니다.", ["Database"])
+			writer.startWriter("DB_DEPRECATED_USE1", LEVEL_INFO, u"SQLiteDatabase Transaction 반대 검사", u"\"SQLiteDatabase:beginTransactionNonExclusive\"을 사용하고 있지 않습니다.", ["Database"])
 	else:
-		writer.startWriter("DB_DEPRECATED_USE1", LEVEL_INFO, "SQLiteDatabase Transaction 반대 검사", "설정된 minSdk > = 11이므로 \"SQLiteDatabase:beginTransactionNonExclusive\" 검사를 무시합니다.", ["Database"])
+		writer.startWriter("DB_DEPRECATED_USE1", LEVEL_INFO, u"SQLiteDatabase Transaction 반대 검사", u"설정된 minSdk > = 11이므로 \"SQLiteDatabase:beginTransactionNonExclusive\" 검사를 무시합니다.", ["Database"])
 
 	# ------------------------------------------------------------------------
 
@@ -2258,8 +2260,8 @@ Google Chrome을 사용하여 탐색:
 
 	if list_path_openOrCreateDatabase or list_path_openOrCreateDatabase2 or list_path_getDir or list_path_getSharedPreferences or list_path_openFileOutput:
 
-		writer.startWriter("MODE_WORLD_READABLE_OR_MODE_WORLD_WRITEABLE", LEVEL_CRITICAL, "App Sandbox Permission 검사", 
-			"보안 문제 \"MODE_WORLD_READABLE\" 또는 \"MODE_WORLD_WRITEABLE\"이(가) 발견되었습니다(참조: https://www.owasp.org/index.php/Mobile_Top_10_2014-M2):")
+		writer.startWriter("MODE_WORLD_READABLE_OR_MODE_WORLD_WRITEABLE", LEVEL_CRITICAL, u"App Sandbox Permission 검사", 
+			u"보안 문제 \"MODE_WORLD_READABLE\" 또는 \"MODE_WORLD_WRITEABLE\"이(가) 발견되었습니다(참조: https://www.owasp.org/index.php/Mobile_Top_10_2014-M2):")
 
 		if list_path_openOrCreateDatabase:
 			writer.write("[openOrCreateDatabase - 3 params]")
@@ -2288,8 +2290,8 @@ Google Chrome을 사용하여 탐색:
 			writer.write("--------------------------------------------------")
 
 	else:
-		writer.startWriter("MODE_WORLD_READABLE_OR_MODE_WORLD_WRITEABLE", LEVEL_INFO, "App Sandbox Permission 검사", 
-			"'openOrCreateDatabase', 'openOrCreateDatabase2', 'getDir', 'getSharedPreferences', 'openFileOutput'에서 보안 문제 \"MODE_WORLD_WRITETABLE\"를 찾을 수 없습니다.")
+		writer.startWriter("MODE_WORLD_READABLE_OR_MODE_WORLD_WRITEABLE", LEVEL_INFO, u"App Sandbox Permission 검사", 
+			u"'openOrCreateDatabase', 'openOrCreateDatabase2', 'getDir', 'getSharedPreferences', 'openFileOutput'에서 보안 문제 \"MODE_WORLD_WRITETABLE\"를 찾을 수 없습니다.")
 
 	# ------------------------------------------------------------------------
 	#List all native method
@@ -2320,13 +2322,13 @@ Google Chrome을 사용하여 탐색:
 		list_NDK_library_classname_to_ndkso_mapping.append([toNdkFileFormat(str(i.getResult()[0])), i.getPath()])
 
 	if list_NDK_library_classname_to_ndkso_mapping:
-		writer.startWriter("NATIVE_LIBS_LOADING", LEVEL_NOTICE, "기본 라이브러리 로드 검사", "네이티브 라이브러리 로드 코드(System.loadLibrary(...))가 발견되었습니다.:")
+		writer.startWriter("NATIVE_LIBS_LOADING", LEVEL_NOTICE, u"기본 라이브러리 로드 검사", u"네이티브 라이브러리 로드 코드(System.loadLibrary(...))가 발견되었습니다.:")
 
 		for ndk_location , path in list_NDK_library_classname_to_ndkso_mapping:
 			writer.write("[" + ndk_location + "]")
 			writer.show_Path(d, path)
 	else:
-		writer.startWriter("NATIVE_LIBS_LOADING", LEVEL_INFO, "기본 라이브러리 로드 검사", "로드된 기본 라이브러리가 없습니다.")
+		writer.startWriter("NATIVE_LIBS_LOADING", LEVEL_INFO, u"기본 라이브러리 로드 검사", u"로드된 기본 라이브러리가 없습니다.")
 
 	dic_native_methods = {}
 	regexp_sqlcipher_database_class = re.compile(".*/SQLiteDatabase;")
@@ -2349,20 +2351,20 @@ Google Chrome을 사용하여 탐색:
 
 			dic_native_methods_sorted = collections.OrderedDict(sorted(dic_native_methods.items()))
 
-			writer.startWriter("NATIVE_METHODS", LEVEL_NOTICE, "기본 메서드 검사", "발견된 네이티브 메서드:")
+			writer.startWriter("NATIVE_METHODS", LEVEL_NOTICE, u"기본 메서드 검사", u"발견된 네이티브 메서드:")
 
 			for class_name, method_names in dic_native_methods_sorted.items():
 				if class_name in dic_NDK_library_classname_to_ndkso_mapping:
-					writer.write("Class: %s (로드된 NDK 파일: %s)" % (class_name, dic_NDK_library_classname_to_ndkso_mapping[class_name]))
+					writer.write(u"Class: %s (로드된 NDK 파일: %s)" % (class_name, dic_NDK_library_classname_to_ndkso_mapping[class_name]))
 				else:
 					writer.write("Class: %s" % (class_name))
-				writer.write("   ->메서드:")
+				writer.write(u"   ->메서드:")
 				for method in method_names:
 					writer.write("        %s%s" % (method.get_name(), method.get_descriptor()))
 
 	else:
 		if args.extra == 2 : #The output may be too verbose, so make it an option
-			writer.startWriter("NATIVE_METHODS", LEVEL_INFO, "기본 메서드 검사", "네이티브 메서드를 찾을 수 없습니다.")
+			writer.startWriter("NATIVE_METHODS", LEVEL_INFO, u"기본 메서드 검사", u"네이티브 메서드를 찾을 수 없습니다.")
 
 	#Framework Detection: Bangcle
 
@@ -2397,16 +2399,16 @@ Google Chrome을 사용하여 탐색:
 					break
 
 		if is_using_Framework_Bangcle :
-			writer.startWriter("FRAMEWORK_BANGCLE", LEVEL_NOTICE, "암호화 프레임워크 - Bangcle", 
-				"이 앱은 Bangcle 암호화 프레임워크(http://www.bangcle.com/)를 사용하고 있습니다.", ["Framework"])
+			writer.startWriter("FRAMEWORK_BANGCLE", LEVEL_NOTICE, u"암호화 프레임워크 - Bangcle", 
+				u"이 앱은 Bangcle 암호화 프레임워크(http://www.bangcle.com/)를 사용하고 있습니다.", ["Framework"])
 		if is_using_Framework_ijiami :
-			writer.startWriter("FRAMEWORK_IJIAMI", LEVEL_NOTICE, "암호화 프레임워크 - Ijiami", 
-				"이 앱은 Ijiami 암호화 프레임워크(http://www.ijiami.cn/)를 사용하고 있습니다.", ["Framework"])
+			writer.startWriter("FRAMEWORK_IJIAMI", LEVEL_NOTICE, u"암호화 프레임워크 - Ijiami", 
+				u"이 앱은 Ijiami 암호화 프레임워크(http://www.ijiami.cn/)를 사용하고 있습니다.", ["Framework"])
 	
 	if is_using_Framework_MonoDroid :
-		writer.startWriter("FRAMEWORK_MONODROID", LEVEL_NOTICE, "암호화 프레임워크 - MonoDroid", "이 앱은 MonoDroid 암호화 프레임워크(http://xamarin.com/android)를 사용하고 있습니다.", ["Framework"])
+		writer.startWriter("FRAMEWORK_MONODROID", LEVEL_NOTICE, u"암호화 프레임워크 - MonoDroid", u"이 앱은 MonoDroid 암호화 프레임워크(http://xamarin.com/android)를 사용하고 있습니다.", ["Framework"])
 	else :
-		writer.startWriter("FRAMEWORK_MONODROID", LEVEL_INFO, "암호화 프레임워크 - MonoDroid", " 앱은 MonoDroid 암호화 프레임워크(http://xamarin.com/android)를 사용하고 있지 않습니다.", ["Framework"])
+		writer.startWriter("FRAMEWORK_MONODROID", LEVEL_INFO, u"암호화 프레임워크 - MonoDroid", u" 앱은 MonoDroid 암호화 프레임워크(http://xamarin.com/android)를 사용하고 있지 않습니다.", ["Framework"])
 
 	# ------------------------------------------------------------------------
 	#Detect dynamic code loading
@@ -2414,10 +2416,10 @@ Google Chrome을 사용하여 탐색:
 	paths_DexClassLoader = vmx.get_tainted_packages().search_methods( "Ldalvik/system/DexClassLoader;", ".", ".")
 	paths_DexClassLoader = filteringEngine.filter_list_of_paths(d, paths_DexClassLoader)
 	if paths_DexClassLoader:
-		writer.startWriter("DYNAMIC_CODE_LOADING", LEVEL_WARNING, "동적 코드 로딩", "동적 코드 로드(DexClassLoader)가 발견되었습니다.")
+		writer.startWriter("DYNAMIC_CODE_LOADING", LEVEL_WARNING, u"동적 코드 로딩", u"동적 코드 로드(DexClassLoader)가 발견되었습니다.")
 		writer.show_Paths(d, paths_DexClassLoader)
 	else:
-		writer.startWriter("DYNAMIC_CODE_LOADING", LEVEL_INFO, "동적 코드 로딩", "동적 코드 로드(DexClassLoader)가 발견되지 않았습니다.")
+		writer.startWriter("DYNAMIC_CODE_LOADING", LEVEL_INFO, u"동적 코드 로딩", u"동적 코드 로드(DexClassLoader)가 발견되지 않았습니다.")
 
 
 	# ------------------------------------------------------------------------
@@ -2426,10 +2428,10 @@ Google Chrome을 사용하여 탐색:
 	paths_ExternalStorageAccess = vmx.get_tainted_packages().search_class_methods_exact_match("Landroid/os/Environment;", "getExternalStorageDirectory", "()Ljava/io/File;")
 	paths_ExternalStorageAccess = filteringEngine.filter_list_of_paths(d, paths_ExternalStorageAccess)
 	if paths_ExternalStorageAccess:
-		writer.startWriter("EXTERNAL_STORAGE", LEVEL_WARNING, "외부 스토리지 액세스", "외부 스토리지 액세스 발견(외부 스토리지에 중요한 파일을 쓰지 마십시오):")
+		writer.startWriter("EXTERNAL_STORAGE", LEVEL_WARNING, u"외부 스토리지 액세스", u"외부 스토리지 액세스 발견(외부 스토리지에 중요한 파일을 쓰지 마십시오):")
 		writer.show_Paths(d, paths_ExternalStorageAccess)
 	else:
-		writer.startWriter("EXTERNAL_STORAGE", LEVEL_INFO, "외부 스토리지 액세스", "외부 스토리지 액세스를 찾을 수 없습니다.")
+		writer.startWriter("EXTERNAL_STORAGE", LEVEL_INFO, u"외부 스토리지 액세스", u"외부 스토리지 액세스를 찾을 수 없습니다.")
 
 	# ------------------------------------------------------------------------
 	#Android Fragment Vulnerability (prior to Android 4.4)
@@ -2477,7 +2479,7 @@ Google Chrome을 사용하여 탐색:
 
 	if list_Fragment_vulnerability_NonMethod_classes or list_Fragment_vulnerability_Method_OnlyReturnTrue_methods or list_Fragment_vulnerability_Method_NoIfOrSwitch_methods:
 		
-		output_string = """'Fragment' 혹은 'Fragment for ActionbarSherlock'는 안드로이드 4.4(API 19) 이전 버전에는 심각한 취약점이 있습니다. 
+		output_string = u"""'Fragment' 혹은 'Fragment for ActionbarSherlock'는 안드로이드 4.4(API 19) 이전 버전에는 심각한 취약점이 있습니다. 
 참조: 
 (1)http://developer.android.com/reference/android/os/Build.VERSION_CODES.html#KITKAT 
 (2)http://developer.android.com/reference/android/preference/PreferenceActivity.html#isValidFragment(java.lang.String) 
@@ -2486,39 +2488,39 @@ Google Chrome을 사용하여 탐색:
 (5)http://securityintelligence.com/wp-content/uploads/2013/12/android-collapses-into-fragments.pdf 
 (6)https://cureblog.de/2013/11/cve-2013-6271-remove-device-locks-from-android-phone/ """
 
-		writer.startWriter("FRAGMENT_INJECTION", LEVEL_CRITICAL, "Fragment 취약성 검사", output_string, None, "BID 64208, CVE-2013-6271")
+		writer.startWriter("FRAGMENT_INJECTION", LEVEL_CRITICAL, u"Fragment 취약성 검사", output_string, None, "BID 64208, CVE-2013-6271")
 
 		if list_Fragment_vulnerability_NonMethod_classes:
 			if int_target_sdk >= 19:
 				#You must override. Otherwise, it always throws Exception
-				writer.write("Android 4.4에서 예외 발생을 방지하려면 모든 \"PreferenceActivity\" 클래스에서 'isValidFragment' 메서드를 재정의해야 합니다.")
+				writer.write(u"Android 4.4에서 예외 발생을 방지하려면 모든 \"PreferenceActivity\" 클래스에서 'isValidFragment' 메서드를 재정의해야 합니다.")
 				for i in list_Fragment_vulnerability_NonMethod_classes: #Notice: Each element in the list is NOT method, but String
 					writer.write("    " + i)
 			else:
 				#You must override. Otherwise, it always throws Exception
-				writer.write("\"PreferenceActivity\" 클래스는 'isValidFragment' 메서드를 재정의하지 않으므로 취약할 수 있습니다(기본 설정 활동에 조각을 로드하지 않은 경우에도 'isValidFragment' 메서드를 재정의하고 이후 변경 시 앱을 보호하려면 \"false\"만 반환하십시오).")
+				writer.write(u"\"PreferenceActivity\" 클래스는 'isValidFragment' 메서드를 재정의하지 않으므로 취약할 수 있습니다(기본 설정 활동에 조각을 로드하지 않은 경우에도 'isValidFragment' 메서드를 재정의하고 이후 변경 시 앱을 보호하려면 \"false\"만 반환하십시오).")
 				for i in list_Fragment_vulnerability_NonMethod_classes: #Notice: Each element in the list is NOT method, but String
 					writer.write("    " + i)
 
 		if list_Fragment_vulnerability_Method_OnlyReturnTrue_methods:
-			writer.write("'isValidFragment'를 재정의하고 해당 클래스에서 \"true\"만 반환합니다. 조각의 유효 여부를 확인하려면 \"if\" 조건을 사용해야 합니다.")
-			writer.write("(예시 코드: http://stackoverflow.com/questions/19973034/isvalidfragment-android-api-19/20139823#20139823)")
+			writer.write(u"'isValidFragment'를 재정의하고 해당 클래스에서 \"true\"만 반환합니다. 조각의 유효 여부를 확인하려면 \"if\" 조건을 사용해야 합니다.")
+			writer.write(u"(예시 코드: http://stackoverflow.com/questions/19973034/isvalidfragment-android-api-19/20139823#20139823)")
 			for method in list_Fragment_vulnerability_Method_OnlyReturnTrue_methods:
 				writer.write("    " + method.easy_print())
 
 		if list_Fragment_vulnerability_Method_NoIfOrSwitch_methods:
-			writer.write("재정의된 'isValidFragment' 메서드 내에서 올바른 Fragment을 확인하십시오.")
+			writer.write(u"재정의된 'isValidFragment' 메서드 내에서 올바른 Fragment을 확인하십시오.")
 			for method in list_Fragment_vulnerability_Method_NoIfOrSwitch_methods:
 				writer.write("    " + method.easy_print())
 
 		if list_Fragment:
-			writer.write("모든 잠재적인 취약점 \"Fragment\":")
+			writer.write(u"모든 잠재적인 취약점 \"Fragment\":")
 			for i in list_Fragment:
 				writer.write("    " + i)
 
 	else:
-		writer.startWriter("FRAGMENT_INJECTION", LEVEL_INFO, "Fragment 취약성 검사", 
-			"\"Fragment\"가 \"Preference Activity\" 또는 \"Sharlock Preference Activity\"에 동적으로 로드되는 취약성을 감지하지 못했습니다.", None, "BID 64208, CVE-2013-6271")
+		writer.startWriter("FRAGMENT_INJECTION", LEVEL_INFO, u"Fragment 취약성 검사", 
+			u"\"Fragment\"가 \"Preference Activity\" 또는 \"Sharlock Preference Activity\"에 동적으로 로드되는 취약성을 감지하지 못했습니다.", None, "BID 64208, CVE-2013-6271")
 
 	# ------------------------------------------------------------------------
 	#Find all "dangerous" permission
@@ -2539,8 +2541,8 @@ Google Chrome을 사용하여 탐색:
 
 	if dangerous_custom_permissions :
 
-		writer.startWriter("PERMISSION_DANGEROUS", LEVEL_CRITICAL, "AndroidManifest 위험한 권한의 보호수준 검사",
-			"""다음 클래스의 보호 수준은 "위험"하므로 다른 앱이 이 권한(AndroidManifest.xml)에 액세스할 수 있습니다. 
+		writer.startWriter("PERMISSION_DANGEROUS", LEVEL_CRITICAL, u"AndroidManifest 위험한 권한의 보호수준 검사",
+			u"""다음 클래스의 보호 수준은 "위험"하므로 다른 앱이 이 권한(AndroidManifest.xml)에 액세스할 수 있습니다. 
 앱에서 "Android:protection"을 사용하여 권한을 선언해야 합니다."signature" 또는 "signatureOrSystem"의 수준"을 지정하여 다른 앱이 이 앱에 대한 메시지를 등록하고 받을 수 없도록 합니다. 
 Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선언한 애플리케이션과 동일한 인증서로 서명되어야 함을 보장합니다. 
 일부 관련 사례를 확인하십시오.: http://www.wooyun.org/bugs/wooyun-2010-039697  
@@ -2556,8 +2558,8 @@ Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선�
 					for list_item in valuelist:
 						writer.write("    -> used by (" + key + ")" + a.format_value(list_item))
 	else :
-		writer.startWriter("PERMISSION_DANGEROUS", LEVEL_INFO, "AndroidManifest 위험한 권한의 보호수준 검사",
-			"\"위험한\" 보호 수준 사용자 지정 사용 권한을 찾을 수 없습니다(AndroidManifest.xml).")
+		writer.startWriter("PERMISSION_DANGEROUS", LEVEL_INFO, u"AndroidManifest 위험한 권한의 보호수준 검사",
+			u"\"위험한\" 보호 수준 사용자 지정 사용 권한을 찾을 수 없습니다(AndroidManifest.xml).")
 
 
 	# ------------------------------------------------------------------------
@@ -2569,8 +2571,8 @@ Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선�
 			normal_or_default_custom_permissions.append(name)
 
 	if normal_or_default_custom_permissions :
-		writer.startWriter("PERMISSION_NORMAL", LEVEL_WARNING, "AndroidManifest 일반 권한의 보호수준 검사",
-			"""다음 클래스의 보호 수준은 "일반" 또는 기본값입니다(AndroidManifest.xml). 
+		writer.startWriter("PERMISSION_NORMAL", LEVEL_WARNING, u"AndroidManifest 일반 권한의 보호수준 검사",
+			u"""다음 클래스의 보호 수준은 "일반" 또는 기본값입니다(AndroidManifest.xml). 
 앱에서 "Android:protection"을 사용하여 권한을 선언해야 합니다."signature" 또는 "signatureOrSystem"의 수준"을 지정하여 다른 앱이 이 앱에 대한 메시지를 등록하고 받을 수 없도록 합니다. 
 Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선언한 애플리케이션과 동일한 인증서로 서명되어야 함을 보장합니다. 
 이러한 권한을 모두 내보내거나 "signature" 또는 "signatureOrSystem" 보호 수준으로 변경해야 합니다.""")
@@ -2583,8 +2585,8 @@ Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선�
 					for list_item in valuelist:
 						writer.write("    -> used by (" + key + ") " + a.format_value(list_item))
 	else :
-		writer.startWriter("PERMISSION_NORMAL", LEVEL_INFO, "AndroidManifest 일반 권한의 보호수준 검사",
-			"기본 또는 \"기본\" 보호 수준 사용자 지정 사용 권한을 찾을 수 없습니다(AndroidManifest.xml).")
+		writer.startWriter("PERMISSION_NORMAL", LEVEL_INFO, u"AndroidManifest 일반 권한의 보호수준 검사",
+			u"기본 또는 \"기본\" 보호 수준 사용자 지정 사용 권한을 찾을 수 없습니다(AndroidManifest.xml).")
 
 	# ------------------------------------------------------------------------
 
@@ -2601,8 +2603,8 @@ Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선�
 				list_lost_exported_components.append( (tag, name) )
 
 	if list_lost_exported_components :
-		writer.startWriter("PERMISSION_NO_PREFIX_EXPORTED", LEVEL_CRITICAL, "AndroidManifest 손실 접두사 검사",
-			""""android:" 접두사(AndroidManifest.xml)를 추가하지 않은 내보낸 구성 요소를 찾았습니다. 
+		writer.startWriter("PERMISSION_NO_PREFIX_EXPORTED", LEVEL_CRITICAL, u"AndroidManifest 손실 접두사 검사",
+			u""""android:" 접두사(AndroidManifest.xml)를 추가하지 않은 내보낸 구성 요소를 찾았습니다. 
 참조: (1)http://blog.curesec.com/article/blog/35.html
                (2)http://safe.baidu.com/2014-07/cve-2013-6272.html
                (3)http://blogs.360.cn/360mobile/2014/07/08/cve-2013-6272/""", None, "CVE-2013-6272")
@@ -2611,8 +2613,8 @@ Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선�
 			writer.write(("%10s => %s") % (tag, a.format_value(name)))
 
 	else :
-		writer.startWriter("PERMISSION_NO_PREFIX_EXPORTED", LEVEL_INFO, "AndroidManifest 손실 접두사 검사",
-			"\"android:\"에 접두사를 추가하지 않은 내보낸 구성 요소가 없습니다.", None, "CVE-2013-6272")
+		writer.startWriter("PERMISSION_NO_PREFIX_EXPORTED", LEVEL_INFO, u"AndroidManifest 손실 접두사 검사",
+			u"\"android:\"에 접두사를 추가하지 않은 내보낸 구성 요소가 없습니다.", None, "CVE-2013-6272")
 
 	# ------------------------------------------------------------------------
 	
@@ -2795,8 +2797,8 @@ Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선�
 
 	if list_alerting_exposing_components_NonGoogle or list_alerting_exposing_components_Google :
 		if list_alerting_exposing_components_NonGoogle:
-			writer.startWriter("PERMISSION_EXPORTED", LEVEL_WARNING, "AndroidManifest Exported Components 검사",
-				"""외부 애플리케이션의 작업(AndroidManifest.xml)을 수신하기 위해 "exported" 구성 요소(런처 제외)를 찾았습니다.
+			writer.startWriter("PERMISSION_EXPORTED", LEVEL_WARNING, u"AndroidManifest Exported Components 검사",
+				u"""외부 애플리케이션의 작업(AndroidManifest.xml)을 수신하기 위해 "exported" 구성 요소(런처 제외)를 찾았습니다.
 이러한 구성 요소는 다른 앱에서 초기화할 수 있습니다. 원하지 않는 경우 속성을 [exported="false"]에 추가하거나 수정해야 합니다.
 "signature" 이상의 protectionLevel을 사용하여 사용자 지정 권한으로 보호하고 "android:permission" 속성에 지정할 수도 있습니다.""")
 
@@ -2804,14 +2806,14 @@ Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선�
 				writer.write(("%10s => %s") % (i[0], i[1]))
 
 		if list_alerting_exposing_components_Google:
-			writer.startWriter("PERMISSION_EXPORTED_GOOGLE", LEVEL_NOTICE, "AndroidManifest Exported Components 검사 2",
-				"Google의 \"Android\" actions(AndroidManifest.xml)을 수신하기 위해 \"exported\" 구성요소(런처 제외)를 찾았습니다.:")
+			writer.startWriter("PERMISSION_EXPORTED_GOOGLE", LEVEL_NOTICE, u"AndroidManifest Exported Components 검사",
+				u"Google의 \"Android\" actions(AndroidManifest.xml)을 수신하기 위해 \"exported\" 구성요소(런처 제외)를 찾았습니다.:")
 
 			for i in list_alerting_exposing_components_Google:
 				writer.write(("%10s => %s") % (i[0], i[1]))
 	else :
-		writer.startWriter("PERMISSION_EXPORTED", LEVEL_INFO, "AndroidManifest Exported Components 검사",
-			"Android 또는 외부 애플리케이션의 작업(AndroidManifest.xml)을 수신하기 위해 내보낸 구성 요소(런처 제외)가 없습니다.")
+		writer.startWriter("PERMISSION_EXPORTED", LEVEL_INFO, u"AndroidManifest Exported Components 검사",
+			u"Android 또는 외부 애플리케이션의 작업(AndroidManifest.xml)을 수신하기 위해 내보낸 구성 요소(런처 제외)가 없습니다.")
 
 	# ------------------------------------------------------------------------
 	#"exported" checking (provider):
@@ -2872,8 +2874,8 @@ Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선�
 	if list_alerting_exposing_providers or list_alerting_exposing_providers_no_exported_setting:
 		if list_alerting_exposing_providers_no_exported_setting :   #providers that Did not set exported
 
-			writer.startWriter("PERMISSION_PROVIDER_IMPLICIT_EXPORTED", LEVEL_CRITICAL, "AndroidManifest ContentProvider Exported 검사",
-				""""exported" 된 속성(AndroidManifest.xml)을 명시적으로 지정하는 것이 좋습니다.
+			writer.startWriter("PERMISSION_PROVIDER_IMPLICIT_EXPORTED", LEVEL_CRITICAL, u"AndroidManifest ContentProvider Exported 검사",
+				u""""exported" 된 속성(AndroidManifest.xml)을 명시적으로 지정하는 것이 좋습니다.
 Android "android:targetSdkVersion" < 17의 경우 ContentProvider의 내보낸 값은 기본적으로 "true"입니다.
 Android "android:targetSdkVersion" >= 17의 경우 ContentProvider의 내보낸 값은 기본적으로 "false"입니다.
 즉, "android:exported"를 명시적으로 설정하지 않으면 ContentProvider가 Android < 4.2 기기에 노출됩니다.
@@ -2893,8 +2895,8 @@ Android >= 4.2 기기에서 동일한 서명으로 서명된 다른 앱은 액�
 
 		if list_alerting_exposing_providers:  #provider with "true" exported and not enough permission protected on it
 
-			writer.startWriter("PERMISSION_PROVIDER_EXPLICIT_EXPORTED", LEVEL_CRITICAL, "AndroidManifest ContentProvider Exported 검사",
-				""""exported"된 ContentProvider를 찾았으므로 기기의 다른 앱이 액세스할 수 있습니다(AndroidManifest.xml). 속성을 [exported="false"]로 수정하거나 원하지 않는 경우 최소한 "signature" protectionalLevel 권한을 설정해야 합니다.
+			writer.startWriter("PERMISSION_PROVIDER_EXPLICIT_EXPORTED", LEVEL_CRITICAL, u"AndroidManifest ContentProvider Exported 검사",
+				u""""exported"된 ContentProvider를 찾았으므로 기기의 다른 앱이 액세스할 수 있습니다(AndroidManifest.xml). 속성을 [exported="false"]로 수정하거나 원하지 않는 경우 최소한 "signature" protectionalLevel 권한을 설정해야 합니다.
 취약한 ContentProvider 예시: 
   (1)https://www.nowsecure.com/mobile-security/ebay-android-content-provider-injection-vulnerability.html
   (2)http://blog.trustlook.com/2013/10/23/ebay-android-content-provider-information-disclosure-vulnerability/
@@ -2903,8 +2905,8 @@ Android >= 4.2 기기에서 동일한 서명으로 서명된 다른 앱은 액�
 				writer.write(("%10s => %s") % ("provider", i[0]))
 
 	else:
-		writer.startWriter("PERMISSION_PROVIDER_IMPLICIT_EXPORTED", LEVEL_INFO, "AndroidManifest ContentProvider Exported 검사",
-			"exported 된 \"ContentProvider\"를 찾을 수 없습니다(AndroidManifest.xml).")
+		writer.startWriter("PERMISSION_PROVIDER_IMPLICIT_EXPORTED", LEVEL_INFO, u"AndroidManifest ContentProvider Exported 검사",
+			u"exported 된 \"ContentProvider\"를 찾을 수 없습니다(AndroidManifest.xml).")
 
 	# ------------------------------------------------------------------------
 	#intent-filter checking:
@@ -2944,8 +2946,8 @@ Android >= 4.2 기기에서 동일한 서명으로 서명된 다른 앱은 액�
 
 	if list_wrong_intent_filter_settings or list_no_actions_in_intent_filter :
 		if list_wrong_intent_filter_settings :
-			writer.startWriter("PERMISSION_INTENT_FILTER_MISCONFIG", LEVEL_WARNING, "AndroidManifest \"intent-filter\" Settings 검사",
-				"""이러한 구성요소(AndroidManifest.xml)의 "intent-filter" 구성이 잘못되었습니다.
+			writer.startWriter("PERMISSION_INTENT_FILTER_MISCONFIG", LEVEL_WARNING, u"AndroidManifest \"intent-filter\" Settings 검사",
+				u"""이러한 구성요소(AndroidManifest.xml)의 "intent-filter" 구성이 잘못되었습니다.
 "intent-filter" 구성에는 "android:exported" 또는 "android:enabled" 속성이 없어야 합니다.
 참조: http://developer.android.com/guide/topics/manifest/intent-filter-element.html
 """)
@@ -2953,31 +2955,31 @@ Android >= 4.2 기기에서 동일한 서명으로 서명된 다른 앱은 액�
 				writer.write(("%10s => %s") % (tag, a.format_value(name)))
 
 		if list_no_actions_in_intent_filter :
-			writer.startWriter("PERMISSION_INTENT_FILTER_MISCONFIG", LEVEL_CRITICAL, "AndroidManifest \"intent-filter\" Settings 검사",
-				"""이러한 구성요소(AndroidManifest.xml)의 "intent-filter" 구성이 잘못되었습니다.
+			writer.startWriter("PERMISSION_INTENT_FILTER_MISCONFIG", LEVEL_CRITICAL, u"AndroidManifest \"intent-filter\" Settings 검사",
+				u"""이러한 구성요소(AndroidManifest.xml)의 "intent-filter" 구성이 잘못되었습니다.
  "intent-filter"에는 하나 이상의 "액션"이 있어야 합니다.
 참조: http://developer.android.com/guide/topics/manifest/intent-filter-element.html
 """)
 			for tag, name in list_no_actions_in_intent_filter :
 				writer.write(("%10s => %s") % (tag, a.format_value(name)))
 	else :
-		writer.startWriter("PERMISSION_INTENT_FILTER_MISCONFIG", LEVEL_INFO, "AndroidManifest \"intent-filter\" Settings 검사",
-			"AndroidManifest.xml의 \"intent-filter\"를 확인했습니다.")
+		writer.startWriter("PERMISSION_INTENT_FILTER_MISCONFIG", LEVEL_INFO, u"AndroidManifest \"intent-filter\" Settings 검사",
+			u"AndroidManifest.xml의 \"intent-filter\"를 확인했습니다.")
 
 	# ------------------------------------------------------------------------
 	#Implicit Service (** Depend on: "exported" checking (activity, activity-alias, service, receiver) **)
 
 	if list_implicit_service_components :
-		writer.startWriter("PERMISSION_IMPLICIT_SERVICE", LEVEL_CRITICAL, "암묵적 서비스 검사",
-			"""앱의 보안을 위해 서비스를 시작할 때 항상 명시적 의도를 사용하고 서비스에 대한 의도 필터를 선언하지 마십시오. 암묵적 의도를 사용하여 서비스를 시작하면 어떤 서비스가 의도에 응답할지 확신할 수 없고 사용자는 어떤 서비스가 시작되는지 볼 수 없기 때문에 보안 위험이 있습니다. 
+		writer.startWriter("PERMISSION_IMPLICIT_SERVICE", LEVEL_CRITICAL, u"암묵적 서비스 검사",
+			u"""앱의 보안을 위해 서비스를 시작할 때 항상 명시적 의도를 사용하고 서비스에 대한 의도 필터를 선언하지 마십시오. 암묵적 의도를 사용하여 서비스를 시작하면 어떤 서비스가 의도에 응답할지 확신할 수 없고 사용자는 어떤 서비스가 시작되는지 볼 수 없기 때문에 보안 위험이 있습니다. 
 Reference: http://developer.android.com/guide/components/intents-filters.html#Types""", ["Implicit_Intent"])
 
 		for name in list_implicit_service_components :
 			writer.write(("=> %s") % (a.format_value(name)))
 
 	else :
-		writer.startWriter("PERMISSION_IMPLICIT_SERVICE", LEVEL_INFO, "암묵적 서비스 검사",
-			"위험한 암시적 서비스가 없습니다.", ["Implicit_Intent"])
+		writer.startWriter("PERMISSION_IMPLICIT_SERVICE", LEVEL_INFO, u"암묵적 서비스 검사",
+			u"위험한 암시적 서비스가 없습니다.", ["Implicit_Intent"])
 
 	# ------------------------------------------------------------------------
 	#SQLite databases
@@ -2985,26 +2987,26 @@ Reference: http://developer.android.com/guide/components/intents-filters.html#Ty
 	is_using_android_dbs = vmx.get_tainted_packages().has_android_databases(filteringEngine.get_filtering_regexp())
 	if is_using_android_dbs :
 		if int_min_sdk < 15 :
-			writer.startWriter("DB_SQLITE_JOURNAL", LEVEL_NOTICE, "Android SQLite 데이터베이스 취약성 검사",
-				"""이 앱은 Android SQLite 데이터베이스를 사용합니다.
+			writer.startWriter("DB_SQLITE_JOURNAL", LEVEL_NOTICE, u"Android SQLite 데이터베이스 취약성 검사",
+				u"""이 앱은 Android SQLite 데이터베이스를 사용합니다.
 Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있습니다.
 그러나 안드로이드 > 4.0으로 업그레이드한 사용자만 해결할 수 있으며 혼자 해결할 수 없습니다(단, "SQL Cipher" 또는 다른 lib로 데이터베이스 및 저널 암호화를 사용할 수 있습니다).
 참조:
 (1) http://blog.watchfire.com/files/androidsqlitejournal.pdf 
 (2) http://www.youtube.com/watch?v=oCXLHjmH5rY """, ["Database"], "CVE-2011-3901")
 		else :
-			writer.startWriter("DB_SQLITE_JOURNAL", LEVEL_NOTICE, "Android SQLite 데이터베이스 취약성 검사",
-				"이 앱은 Android SQLite 데이터베이스를 사용하고 있습니다. 그러나 SQLite Journal 정보 노출 취약성에 시달리지 않습니다.", ["Database"], "CVE-2011-3901")
+			writer.startWriter("DB_SQLITE_JOURNAL", LEVEL_NOTICE, u"Android SQLite 데이터베이스 취약성 검사",
+				u"이 앱은 Android SQLite 데이터베이스를 사용하고 있습니다. 그러나 SQLite Journal 정보 노출 취약성에 시달리지 않습니다.", ["Database"], "CVE-2011-3901")
 	else :
-		writer.startWriter("DB_SQLITE_JOURNAL", LEVEL_INFO, "Android SQLite 데이터베이스 취약성 검사",
-			"이 앱은 Android SQLite 데이터베이스를 사용하지 않습니다.", ["Database"], "CVE-2011-3901")
+		writer.startWriter("DB_SQLITE_JOURNAL", LEVEL_INFO, u"Android SQLite 데이터베이스 취약성 검사",
+			u"이 앱은 Android SQLite 데이터베이스를 사용하지 않습니다.", ["Database"], "CVE-2011-3901")
 
 	# ------------------------------------------------------------------------
 	#Checking whether the app is using SQLCipher:
 	#Reference to <<Essential_Block_1>>
 	if isUsingSQLCipher :
-		writer.startWriter("DB_SQLCIPHER", LEVEL_NOTICE, "Android SQLite 데이터베이스 암호화 (SQLCipher)",
-			"이 앱은 SQLCipher(http://sqlcipher.net/)를 사용하여 데이터베이스를 암호화하거나 암호 해독합니다.", ["Database"])
+		writer.startWriter("DB_SQLCIPHER", LEVEL_NOTICE, u"Android SQLite 데이터베이스 암호화 (SQLCipher)",
+			u"이 앱은 SQLCipher(http://sqlcipher.net/)를 사용하여 데이터베이스를 암호화하거나 암호 해독합니다.", ["Database"])
 
 		path_sqlcipher_dbs = vmx.get_tainted_packages().search_sqlcipher_databases()	#Don't do the exclusion checking on this one because it's not needed
 
@@ -3028,8 +3030,8 @@ Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있
 				writer.show_Path(d, db_path)
 
 	else :
-		writer.startWriter("DB_SQLCIPHER", LEVEL_INFO, "Android SQLite 데이터베이스 암호화 (SQLCipher)",
-			"이 앱은 SQLCipher(http://sqlcipher.net/)를 사용하여 데이터베이스를 암호화하거나 암호 해독하지 않습니다.", ["Database"])
+		writer.startWriter("DB_SQLCIPHER", LEVEL_INFO, u"Android SQLite 데이터베이스 암호화 (SQLCipher)",
+			u"이 앱은 SQLCipher(http://sqlcipher.net/)를 사용하여 데이터베이스를 암호화하거나 암호 해독하지 않습니다.", ["Database"])
 
 	# ------------------------------------------------------------------------
 	#Find "SQLite Encryption Extension (SEE) on Android"
@@ -3040,26 +3042,26 @@ Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있
 			break
 
 	if has_SSE_databases :
-		writer.startWriter("DB_SEE", LEVEL_NOTICE, "Android SQLite 데이터베이스 암호화 (SQLite Encryption Extension (SEE))",
-			"이 앱은 Android(http://www.sqlite.org/android)에서 SQLite Encryption Extension(SEE)을 사용하여 데이터베이스를 암호화하거나 암호 해독합니다.", ["Database"])
+		writer.startWriter("DB_SEE", LEVEL_NOTICE, u"Android SQLite 데이터베이스 암호화 (SQLite Encryption Extension (SEE))",
+			u"이 앱은 Android(http://www.sqlite.org/android)에서 SQLite Encryption Extension(SEE)을 사용하여 데이터베이스를 암호화하거나 암호 해독합니다.", ["Database"])
 	
 	else :
-		writer.startWriter("DB_SEE", LEVEL_INFO, "Android SQLite 데이터베이스 암호화 (SQLite Encryption Extension (SEE))",
-			"이 앱은 Android(http://www.sqlite.org/android)에서 데이터베이스를 암호화하거나 암호 해독하기 위해 SQLite Encryption Extension(SEE)을 사용하지 않습니다.", ["Database"])
+		writer.startWriter("DB_SEE", LEVEL_INFO, u"Android SQLite 데이터베이스 암호화 (SQLite Encryption Extension (SEE))",
+			u"이 앱은 Android(http://www.sqlite.org/android)에서 데이터베이스를 암호화하거나 암호 해독하기 위해 SQLite Encryption Extension(SEE)을 사용하지 않습니다.", ["Database"])
 
 	# ------------------------------------------------------------------------
 	#Searching SQLite "PRAGMA key" encryption:
 	result_sqlite_encryption = efficientStringSearchEngine.get_search_result_by_match_id("$__sqlite_encryption__")
 	result_sqlite_encryption = filteringEngine.filter_efficient_search_result_value(result_sqlite_encryption)
 	if result_sqlite_encryption :
-		writer.startWriter("HACKER_DB_KEY", LEVEL_NOTICE, "Android SQLite 데이터베이스 암호화용 키",
-			"SQLite 데이터베이스를 암호화하기 위해 대칭 키(PRAGMA 키)를 사용한 것을 찾았습니다", ["Database", "Hacker"])
+		writer.startWriter("HACKER_DB_KEY", LEVEL_NOTICE, u"Android SQLite 데이터베이스 암호화용 키",
+			u"SQLite 데이터베이스를 암호화하기 위해 대칭 키(PRAGMA 키)를 사용한 것을 찾았습니다", ["Database", "Hacker"])
 
 		for found_string, method in result_sqlite_encryption :
 			writer.write(method.get_class_name() + "->" + method.get_name() + method.get_descriptor())
 	else :
-		writer.startWriter("HACKER_DB_KEY", LEVEL_INFO, "Android SQLite 데이터베이스 암호화용 키",
-			"SQLite 데이터베이스를 암호화하기 위해 대칭 키(PRAGMA 키)를 사용하는 것을 찾지 못했습니다(사용할 수도 있지만 찾지 못했습니다).", ["Database", "Hacker"])
+		writer.startWriter("HACKER_DB_KEY", LEVEL_INFO, u"Android SQLite 데이터베이스 암호화용 키",
+			u"SQLite 데이터베이스를 암호화하기 위해 대칭 키(PRAGMA 키)를 사용하는 것을 찾지 못했습니다(사용할 수도 있지만 찾지 못했습니다).", ["Database", "Hacker"])
 
 	# ------------------------------------------------------------------------
 	#Searching checking root or not:
@@ -3076,8 +3078,8 @@ Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있
 	result_possibly_root_total = filteringEngine.filter_efficient_search_result_value(result_possibly_root_total)
 
 	if result_possibly_root_total :
-		writer.startWriter("COMMAND_MAYBE_SYSTEM", LEVEL_NOTICE, "\"root\" 또는 시스템 권한 실행 검사", 
-			"앱에는 \"root\" 권한, 마운트 파일 시스템 작업 또는 모니터링 시스템에 대한 코드 검사가 있을 수 있습니다.", ["Command"])
+		writer.startWriter("COMMAND_MAYBE_SYSTEM", LEVEL_NOTICE, u"\"root\" 또는 시스템 권한 실행 검사", 
+			u"앱에는 \"root\" 권한, 마운트 파일 시스템 작업 또는 모니터링 시스템에 대한 코드 검사가 있을 수 있습니다.", ["Command"])
 
 		list_possible_root = []
 		list_possible_remount_fs = []
@@ -3103,8 +3105,8 @@ Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있
 				writer.write(method.get_class_name() + "->" + method.get_name() + method.get_descriptor())
 	else :
 
-		writer.startWriter("COMMAND_MAYBE_SYSTEM", LEVEL_INFO, "\"root\" 또는 시스템 권한 실행 검사", 
-			"\"root\" 권한(su)을 확인하거나 시스템 권한을 얻는 코드를 찾지 못했습니다(아직 찾지 못했을 가능성이 있음).", ["Command"])
+		writer.startWriter("COMMAND_MAYBE_SYSTEM", LEVEL_INFO, u"\"root\" 또는 시스템 권한 실행 검사", 
+			u"\"root\" 권한(su)을 확인하거나 시스템 권한을 얻는 코드를 찾지 못했습니다(아직 찾지 못했을 가능성이 있음).", ["Command"])
 
 	# ------------------------------------------------------------------------
 	#Android getting IMEI, Android_ID, UUID problem
@@ -3114,8 +3116,8 @@ Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있
 
 	if path_Device_id:
 
-		writer.startWriter("SENSITIVE_DEVICE_ID", LEVEL_WARNING, "IMEI 및 Device ID 가져오기", 
-			"""이 앱에는 "device ID(IMEI)"를 가져오는 코드가 있지만 이 "TelephonyManager.getDeviceId()" 접근 방식에는 문제가 있습니다.
+		writer.startWriter("SENSITIVE_DEVICE_ID", LEVEL_WARNING, u"IMEI 및 Device ID 가져오기", 
+			u"""이 앱에는 "device ID(IMEI)"를 가져오는 코드가 있지만 이 "TelephonyManager.getDeviceId()" 접근 방식에는 문제가 있습니다.
 1. 비 전화: 전화 통신 하드웨어가 없는 Wi-Fi 전용 장치 또는 음악 플레이어에는 이러한 종류의 고유 식별자가 없습니다.
 2. 지속성: 이 기능이 있는 기기에서는 기기 데이터 삭제 및 공장 초기화 후에도 지속됩니다. 이 상황에서 앱이 이를 동일한 장치로 간주해야 하는지 여부는 전혀 명확하지 않습니다.
 3. 권한: READ_PHONE_STATE 권한이 필요합니다. 
@@ -3128,8 +3130,8 @@ Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있
 
 	else:
 
-		writer.startWriter("SENSITIVE_DEVICE_ID", LEVEL_INFO, "IMEI 및 Device ID 가져오기", 
-			"이 앱이 \"TelephonyManager.getDeviceId()\" 접근 방식으로 \"Device ID(IMEI)\"를 가져오는 것을 감지하지 못했습니다.", ["Sensitive_Information"])
+		writer.startWriter("SENSITIVE_DEVICE_ID", LEVEL_INFO, u"IMEI 및 Device ID 가져오기", 
+			u"이 앱이 \"TelephonyManager.getDeviceId()\" 접근 방식으로 \"Device ID(IMEI)\"를 가져오는 것을 감지하지 못했습니다.", ["Sensitive_Information"])
 
 	# ------------------------------------------------------------------------
 	#Android "android_id"
@@ -3145,8 +3147,8 @@ Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있
 			list_android_id.append(i.getPath())
 
 	if list_android_id:		
-		writer.startWriter("SENSITIVE_SECURE_ANDROID_ID", LEVEL_WARNING, "ANDROID_ID 가져오기", 
-			"""이 앱에는 64비트 숫자 "Settings.Secure.ANDROID_ID"를 가져오는 코드가 있습니다.
+		writer.startWriter("SENSITIVE_SECURE_ANDROID_ID", LEVEL_WARNING, u"ANDROID_ID 가져오기", 
+			u"""이 앱에는 64비트 숫자 "Settings.Secure.ANDROID_ID"를 가져오는 코드가 있습니다.
 ANDROID_ID는 고유한 기기 식별자에 적합합니다. 하지만 단점이 있습니다. 먼저 Android 2.2(Froyo) 이전 릴리스에서는 100% 신뢰할 수 없습니다.
 또한 모든 인스턴스에 동일한 ANDROID_ID가 있는 주요 개발업체의 인기 있는 handset에 널리 관찰된 버그가 하나 이상 있었습니다.
 장치의 고유 ID를 얻으려면 다음 문서에서 "Installation" 프레임워크를 사용하는 것이 좋습니다.
@@ -3157,8 +3159,8 @@ ANDROID_ID는 고유한 기기 식별자에 적합합니다. 하지만 단점이
 			writer.show_Path(d, path)
 	else:
 
-		writer.startWriter("SENSITIVE_SECURE_ANDROID_ID", LEVEL_INFO, "ANDROID_ID 가져오기", 
-			"이 앱이 64비트의 번호 \"Settings.Secure.ANDROID_ID\"를 가져오는 것을 감지하지 못했습니다.", ["Sensitive_Information"])
+		writer.startWriter("SENSITIVE_SECURE_ANDROID_ID", LEVEL_INFO, u"ANDROID_ID 가져오기", 
+			u"이 앱이 64비트의 번호 \"Settings.Secure.ANDROID_ID\"를 가져오는 것을 감지하지 못했습니다.", ["Sensitive_Information"])
 
 	# ------------------------------------------------------------------------
 	#Checking sending SMS code
@@ -3180,12 +3182,12 @@ ANDROID_ID는 고유한 기기 식별자에 적합합니다. 하지만 단점이
 	path_sms_sending = filteringEngine.filter_list_of_paths(d, path_sms_sending)
 
 	if path_sms_sending:
-		writer.startWriter("SENSITIVE_SMS", LEVEL_WARNING, "SMS 전송 코드", 
-			"이 앱에는 SMS 메시지를 보내기 위한 코드가 있습니다. (sendDataMessage, sendMultipartTextMessage or sendTextMessage):")
+		writer.startWriter("SENSITIVE_SMS", LEVEL_WARNING, u"SMS 전송 코드", 
+			u"이 앱에는 SMS 메시지를 보내기 위한 코드가 있습니다. (sendDataMessage, sendMultipartTextMessage or sendTextMessage):")
 		writer.show_Paths(d, path_sms_sending)
 	else:
-		writer.startWriter("SENSITIVE_SMS", LEVEL_INFO, "SMS 전송 코드", 
-			"이 앱에 SMS 메시지를 보내기 위한 코드가 있음을 감지하지 못했습니다. (sendDataMessage, sendMultipartTextMessage or sendTextMessage).")
+		writer.startWriter("SENSITIVE_SMS", LEVEL_INFO, u"SMS 전송 코드", 
+			u"이 앱에 SMS 메시지를 보내기 위한 코드가 있음을 감지하지 못했습니다. (sendDataMessage, sendMultipartTextMessage or sendTextMessage).")
 
 	# ------------------------------------------------------------------------
 	#Checking shared_user_id
@@ -3197,16 +3199,16 @@ ANDROID_ID는 고유한 기기 식별자에 적합합니다. 하지만 단점이
 		sharedUserId_in_system = True
 		
 	if sharedUserId_in_system :
-		writer.startWriter("SHARED_USER_ID", LEVEL_NOTICE, "AndroidManifest sharedUserId 검사", 
-			"이 앱은 \"system(uid=1000)\" 권한이 필요한 \"android.uid.system\" sharedUserId를 사용합니다. 사용자의 기기에 성공적으로 설치하려면 개발업체의 키 저장소 또는 Google의 키 저장소로 서명해야 합니다.", ["System"])
+		writer.startWriter("SHARED_USER_ID", LEVEL_NOTICE, u"AndroidManifest sharedUserId 검사", 
+			u"이 앱은 \"system(uid=1000)\" 권한이 필요한 \"android.uid.system\" sharedUserId를 사용합니다. 사용자의 기기에 성공적으로 설치하려면 개발업체의 키 저장소 또는 Google의 키 저장소로 서명해야 합니다.", ["System"])
 	else :
-		writer.startWriter("SHARED_USER_ID", LEVEL_INFO, "AndroidManifest sharedUserId 검사", 
-			"이 앱은 \"android.uid.system\" sharedUserId를 사용하지 않습니다.", ["System"])
+		writer.startWriter("SHARED_USER_ID", LEVEL_INFO, u"AndroidManifest sharedUserId 검사", 
+			u"이 앱은 \"android.uid.system\" sharedUserId를 사용하지 않습니다.", ["System"])
 
 	# System shared_user_id + Master Key Vulnerability checking: (Depends on "Master Key Vulnerability checking")
 	if sharedUserId_in_system and isMasterKeyVulnerability :
-		writer.startWriter("MASTER_KEY_SYSTEM_APP", LEVEL_CRITICAL, "Master Key 취약점이 있는 루팅 시스템", 
-			"이 앱은 Master Key 취약점이 있는 \"system(uid=1000)\" 권한을 요청하여 기기를 루팅시키는 악성코드가 있습니다.")
+		writer.startWriter("MASTER_KEY_SYSTEM_APP", LEVEL_CRITICAL, u"Master Key 취약점이 있는 루팅 시스템", 
+			u"이 앱은 Master Key 취약점이 있는 \"system(uid=1000)\" 권한을 요청하여 기기를 루팅시키는 악성코드가 있습니다.")
 
 	# ------------------------------------------------------------------------
 	#File delete alert
@@ -3215,14 +3217,14 @@ ANDROID_ID는 고유한 기기 식별자에 적합합니다. 하지만 단점이
 	path_FileDelete = filteringEngine.filter_list_of_paths(d, path_FileDelete)
 
 	if path_FileDelete :
-		writer.startWriter("FILE_DELETE", LEVEL_NOTICE, "File Unsafe Delete 검사", 
-			"""삭제한 모든 항목은 사용자나 공격자, 특히 루팅된 기기에 의해 복구될 수 있습니다.
+		writer.startWriter("FILE_DELETE", LEVEL_NOTICE, u"File Unsafe Delete 검사", 
+			u"""삭제한 모든 항목은 사용자나 공격자, 특히 루팅된 기기에 의해 복구될 수 있습니다.
 필수 파일을 삭제하기 위해 "file.delete()"를 사용하지 마십시오.
 이 비디오를 확인하십시오: https://www.youtube.com/watch?v=tGw1fxUD-uY""")
 		writer.show_Paths(d, path_FileDelete)
 	else :
-		writer.startWriter("FILE_DELETE", LEVEL_INFO, "File Unsafe Delete 검사", 
-			"파일을 안전하지 않게 삭제하고 있음을 감지하지 못했습니다.")
+		writer.startWriter("FILE_DELETE", LEVEL_INFO, u"File Unsafe Delete 검사", 
+			u"파일을 안전하지 않게 삭제하고 있음을 감지하지 못했습니다.")
 
 	# ------------------------------------------------------------------------
 	#Check if app check for installing from Google Play
@@ -3231,12 +3233,12 @@ ANDROID_ID는 고유한 기기 식별자에 적합합니다. 하지만 단점이
 	path_getInstallerPackageName = filteringEngine.filter_list_of_paths(d, path_getInstallerPackageName)
 
 	if path_getInstallerPackageName :
-		writer.startWriter("HACKER_INSTALL_SOURCE_CHECK", LEVEL_NOTICE, "APK Installing Source 검사", 
-			"이 앱에는 코드 검사 APK 설치 프로그램 소스(예: Google Play, Amazon 등)가 있습니다. 앱이 공격자에 의해 해킹되었는지 확인하는 데 사용할 수 있습니다.", ["Hacker"])
+		writer.startWriter("HACKER_INSTALL_SOURCE_CHECK", LEVEL_NOTICE, u"APK Installing Source 검사", 
+			u"이 앱에는 코드 검사 APK 설치 프로그램 소스(예: Google Play, Amazon 등)가 있습니다. 앱이 공격자에 의해 해킹되었는지 확인하는 데 사용할 수 있습니다.", ["Hacker"])
 		writer.show_Paths(d, path_getInstallerPackageName)
 	else :
-		writer.startWriter("HACKER_INSTALL_SOURCE_CHECK", LEVEL_INFO, "APK Installing Source 검사", 
-			"이 앱이 APK 설치 프로그램 소스를 검사하는 것을 감지하지 못했습니다.", ["Hacker"])
+		writer.startWriter("HACKER_INSTALL_SOURCE_CHECK", LEVEL_INFO, u"APK Installing Source 검사", 
+			u"이 앱이 APK 설치 프로그램 소스를 검사하는 것을 감지하지 못했습니다.", ["Hacker"])
 
 	# ------------------------------------------------------------------------
 	#WebView setAllowFileAccess:
@@ -3307,8 +3309,8 @@ ANDROID_ID는 고유한 기기 식별자에 적합합니다. 하지만 단점이
 
 		path_setAllowFileAccess_confirm_vulnerable_src_class_func = sorted(set(path_setAllowFileAccess_confirm_vulnerable_src_class_func))
 
-		writer.startWriter("WEBVIEW_ALLOW_FILE_ACCESS", LEVEL_WARNING, "WebView 로컬 파일 액세스 공격 검사", 
-			"""WebView에서 "setAllowFileAccess(true)"를 찾거나 설정되지 않았습니다(기본적으로 사용 가능). 공격자는 WebView에 악의적인 스크립트를 주입하고 로컬 리소스에 액세스할 수 있는 기회를 이용할 수 있습니다. 이 문제는 로컬 파일 시스템 액세스를 비활성화하여 완화하거나 방지할 수 있습니다. (기본적으로 사용 가능)
+		writer.startWriter("WEBVIEW_ALLOW_FILE_ACCESS", LEVEL_WARNING, u"WebView 로컬 파일 액세스 공격 검사", 
+			u"""WebView에서 "setAllowFileAccess(true)"를 찾거나 설정되지 않았습니다(기본적으로 사용 가능). 공격자는 WebView에 악의적인 스크립트를 주입하고 로컬 리소스에 액세스할 수 있는 기회를 이용할 수 있습니다. 이 문제는 로컬 파일 시스템 액세스를 비활성화하여 완화하거나 방지할 수 있습니다. (기본적으로 사용 가능)
 이렇게 하면 파일 시스템 액세스만 활성화되거나 비활성화됩니다. 자산 및 리소스는 file:///android_asset 및 file:///android_res를 사용하여 계속 액세스할 수 있습니다.
 공격자는 "mWebView.loadUrl("file:///data/data/[Your_Package_Name]/[File]");"을 사용하여 앱의 로컬 파일에 액세스할 수 있습니다.
 참조: (1)https://labs.mwrinfosecurity.com/blog/2012/04/23/adventures-with-android-webviews/
@@ -3319,15 +3321,15 @@ WebView에 "yourWebView.getSettings().setAllowFileAccess(false)"를 추가하거
 			writer.write(i)
 
 	else :
-		writer.startWriter("WEBVIEW_ALLOW_FILE_ACCESS", LEVEL_INFO, "WebView 로컬 파일 액세스 공격 검사", 
-			"잠재적으로 중요한 로컬 파일 액세스 설정을 찾지 못했습니다.", ["WebView"])
+		writer.startWriter("WEBVIEW_ALLOW_FILE_ACCESS", LEVEL_INFO, u"WebView 로컬 파일 액세스 공격 검사", 
+			u"잠재적으로 중요한 로컬 파일 액세스 설정을 찾지 못했습니다.", ["WebView"])
 
 	# ------------------------------------------------------------------------
 	#Adb Backup check
 
 	if a.is_adb_backup_enabled() :
-		writer.startWriter("ALLOW_BACKUP", LEVEL_NOTICE, "AndroidManifest Adb Backup 검사", 
-			"""이 앱에 대해 ADB Backup이 활성화됩니다(기본값: 활성화됨). ADB Backup은 모든 파일을 Backup할 수 있는 좋은 도구입니다. 이 앱에 대해 열려 있는 경우 휴대전화를 가진 사람들이 휴대전화에서 이 앱에 대한 모든 민감한 데이터를 복사할 수 있습니다(전제 조건: 1.휴대전화 화면 잠금 해제 2. 개발자 모드를 엽니다). 민감한 데이터에는 평생 액세스 토큰, 사용자 이름 또는 비밀번호 등이 포함될 수 있습니다.
+		writer.startWriter("ALLOW_BACKUP", LEVEL_NOTICE, u"AndroidManifest Adb Backup 검사", 
+			u"""이 앱에 대해 ADB Backup이 활성화됩니다(기본값: 활성화됨). ADB Backup은 모든 파일을 Backup할 수 있는 좋은 도구입니다. 이 앱에 대해 열려 있는 경우 휴대전화를 가진 사람들이 휴대전화에서 이 앱에 대한 모든 민감한 데이터를 복사할 수 있습니다(전제 조건: 1.휴대전화 화면 잠금 해제 2. 개발자 모드를 엽니다). 민감한 데이터에는 평생 액세스 토큰, 사용자 이름 또는 비밀번호 등이 포함될 수 있습니다.
 ADB Backup 관련 보안 사례:
 1.http://www.securityfocus.com/archive/1/530288/30/0/threaded
 2.http://blog.c22.cc/advisories/cve-2013-5112-evernote-android-insecure-storage-of-pin-data-bypass-of-pin-protection/
@@ -3335,8 +3337,8 @@ ADB Backup 관련 보안 사례:
 참조: http://developer.android.com/guide/topics/manifest/application-element.html#allowbackup
 """)
 	else :
-		writer.startWriter("ALLOW_BACKUP", LEVEL_INFO, "AndroidManifest Adb Backup 검사", 
-			"이 앱은 Adb Backup을 비활성화했습니다.")
+		writer.startWriter("ALLOW_BACKUP", LEVEL_INFO, u"AndroidManifest Adb Backup 검사", 
+			u"이 앱은 Adb Backup을 비활성화했습니다.")
 
 	# ------------------------------------------------------------------------
 	#SSL Verification Fail (To check whether the code verifies the certificate)
@@ -3366,11 +3368,11 @@ ADB Backup 관련 보안 사례:
 	if list_X509Certificate_Critical_class or list_X509Certificate_Warning_class :
 
 		log_level = LEVEL_WARNING
-		log_partial_prefix_msg = "이 앱이 SSL 인증서의 유효성을 확인하는 조건이 있는지 확인하십시오. 제대로 확인하지 않으면 SSL 연결에 대해 자체 서명, 만료 또는 불일치 CN 인증서를 허용할 수 있습니다."
+		log_partial_prefix_msg = u"이 앱이 SSL 인증서의 유효성을 확인하는 조건이 있는지 확인하십시오. 제대로 확인하지 않으면 SSL 연결에 대해 자체 서명, 만료 또는 불일치 CN 인증서를 허용할 수 있습니다."
 
 		if list_X509Certificate_Critical_class :
 			log_level = LEVEL_CRITICAL
-			log_partial_prefix_msg = "이 앱은 SSL 인증서의 유효성을 확인하지 않습니다. SSL 연결을 위해 자체 서명, 만료 또는 불일치 CN 인증서를 허용합니다."
+			log_partial_prefix_msg = u"이 앱은 SSL 인증서의 유효성을 확인하지 않습니다. SSL 연결을 위해 자체 서명, 만료 또는 불일치 CN 인증서를 허용합니다."
 
 		list_X509Certificate_merge_list = []
 		list_X509Certificate_merge_list.extend(list_X509Certificate_Critical_class)
@@ -3388,8 +3390,8 @@ ADB Backup 관련 보안 사례:
 
 						dict_X509Certificate_class_name_to_caller_mapping[referenced_class_name].append(method)
 
-		writer.startWriter("SSL_X509", log_level, "SSL 인증서 확인 검사", 
-			log_partial_prefix_msg + """
+		writer.startWriter("SSL_X509", log_level, u"SSL 인증서 확인 검사", 
+			log_partial_prefix_msg + u"""
 이것은 critical한 취약점이며 공격자가 사용자 모르게 MITM 공격을 수행할 수 있도록 합니다
 사용자의 사용자 이름이나 비밀번호를 전송하는 경우 이러한 민감한 정보가 누출될 수 있습니다.
 참조:
@@ -3418,8 +3420,8 @@ ADB Backup 관련 보안 사례:
 						writer.write("      -> used by: " + used_method.get_class_name() + "->" + used_method.get_name() + used_method.get_descriptor())
 
 	else :
-		writer.startWriter("SSL_X509", LEVEL_INFO, "SSL 인증서 확인 검사", 
-				"취약한 X509Certificate 코드를 찾지 못했습니다.", ["SSL_Security"])
+		writer.startWriter("SSL_X509", LEVEL_INFO, u"SSL 인증서 확인 검사", 
+				u"취약한 X509Certificate 코드를 찾지 못했습니다.", ["SSL_Security"])
 
 	#----------------------------------------------------------------
 	#Must complete the last writer
