@@ -1030,10 +1030,10 @@ def __analyze(writer, args) :
 	apk_Path = APK_FILE_NAME_STRING  # + ".apk"
 
 	if (".." in args.apk_file) :
-		raise ExpectedException("apk_file_name_slash_twodots_error", "APK 파일 이름에는 슬래시(/) 또는 두 개의 점(...)을 사용할 수 없습니다. (File: " + apk_Path + ").") 
+		raise ExpectedException("apk_file_name_slash_twodots_error", u"APK 파일 이름에는 슬래시(/) 또는 두 개의 점(...)을 사용할 수 없습니다. (File: " + apk_Path + ").") 
 
 	if not os.path.isfile(apk_Path) :
-		raise ExpectedException("apk_file_not_exist", "APK이 존재하지 않습니다. (File: " + apk_Path + ").")
+		raise ExpectedException("apk_file_not_exist", u"APK이 존재하지 않습니다. (File: " + apk_Path + ").")
 
 	if args.store_analysis_result_in_db :
 		try:
@@ -1068,7 +1068,7 @@ def __analyze(writer, args) :
 	package_name = a.get_package()
 
 	if isNullOrEmptyString(package_name, True) :
-		raise ExpectedException("package_name_empty", "Package이름이 존재하지 않습니다. (File: " + apk_Path + ").")
+		raise ExpectedException("package_name_empty", u"Package이름이 존재하지 않습니다. (File: " + apk_Path + ").")
 
 	writer.writeInf("platform", "Android", "Platform")
 	writer.writeInf("package_name", str(package_name), "Package Name")
@@ -1089,7 +1089,7 @@ def __analyze(writer, args) :
 			writer.writeInf("package_version_code", a.get_androidversion_code(), "Package Version Code")
 
 	if len(a.get_dex()) == 0:
-		raise ExpectedException("classes_dex_not_in_apk", "APK 파일이 손상되었습니다. \"filename.pilename\" 파일을 찾을 수 없습니다. (File: " + apk_Path + ").")
+		raise ExpectedException("classes_dex_not_in_apk", u"APK 파일이 손상되었습니다. \"filename.pilename\" 파일을 찾을 수 없습니다. (File: " + apk_Path + ").")
 
 	try:
 		str_min_sdk_version = a.get_min_sdk_version()
