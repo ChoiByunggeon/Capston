@@ -1565,7 +1565,7 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 
 		list_base64_decoded_urls = {}
 
-		writer.startWriter("HACKER_BASE64_STRING_DECODE", LEVEL_CRITICAL, u"Base64 문자열 인코딩", u"Found Base64 인코딩 발견 \"String(s)\" (총: " + str(len(organized_list_base64_success_decoded_string_to_original_mapping)) + "). We cannot guarantee all of the Strings are Base64 encoding and also we will not show you the decoded binary file:", ["Hacker"])
+		writer.startWriter("HACKER_BASE64_STRING_DECODE", LEVEL_CRITICAL, u"Base64 문자열 인코딩", u"Found Base64 인코딩 발견 \"String(s)\" (총: " + str(len(organized_list_base64_success_decoded_string_to_original_mapping)) + "). 모든 문자열이 Base64 인코딩이라고 보장할 수 없으며 디코딩된 바이너리 파일도 보여드리지 않습니다.:", ["Hacker"])
 
 		for decoded_string, original_string, dict_class_to_method_mapping in organized_list_base64_success_decoded_string_to_original_mapping : 
 
