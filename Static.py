@@ -23,7 +23,7 @@ import platform
 import imp
 import sys
 reload(sys)
-sys.setdefaultencoding
+sys.setdefaultencoding('utf-8')
 
 """
 	*****************************************************************************
