@@ -3548,7 +3548,7 @@ def __persist_file(writer, args) :
 	signature_unique_analyze =  writer.getInf("signature_unique_analyze")
 
 	if package_name and signature_unique_analyze :
-		return writer.save_result_to_file(os.path.join(args.report_output_dir, package_name + "_" + signature_unique_analyze + ".txt"), args)
+		return writer.save_result_to_file(os.path.join(args.report_output_dir, package_name + u"_상세보고서" + ".txt"), args)
 	else :
 		print("\"package_name\" or \"signature_unique_analyze\" not exist.")
 		return False
