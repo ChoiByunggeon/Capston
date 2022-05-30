@@ -411,15 +411,15 @@ class Writer :
 
 				output_string = ""
 				for line in self.__cache_output_detail_stream :
-					output_string = output_string + str(line).encode('string_escape')	# To escape the "\n" shown in the original string inside the APK
+					output_string = output_string + str(line).encode('string_escape').encode('utf-8')	# To escape the "\n" shown in the original string inside the APK
 
 				self.__output_dict_vector_result_information[current_tag]["vector_details"] = self.get_valid_encoding_utf8_string(output_string.rstrip(str('\n').encode('string_escape')))
-				try :
+				'''try :
 					self.__output_dict_vector_result_information[current_tag]["title"] = self.get_valid_encoding_utf8_string(self.__output_dict_vector_result_information[current_tag]["title"])
 				except KeyError :
 					if DEBUG:
 						print("[KeyError on \"self.__output_dict_vector_result_information\"]")
-					pass
+					pass'''
 
 
 		self.__output_current_tag = ""
@@ -3548,7 +3548,7 @@ def __persist_file(writer, args) :
 	signature_unique_analyze =  writer.getInf("signature_unique_analyze")
 
 	if package_name and signature_unique_analyze :
-		return writer.save_result_to_file(os.path.join(args.report_output_dir, package_name + u"_상세보고서" + ".txt"), args)
+		return writer.save_result_to_file(os.path.join(args.report_output_dir, package_name + u"상세보고서" + ".txt"), args)
 	else :
 		print("\"package_name\" or \"signature_unique_analyze\" not exist.")
 		return False
