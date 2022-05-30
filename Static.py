@@ -185,7 +185,7 @@ class Writer :
 			dst_class_name, dst_method_name, dst_descriptor =  path.get_dst( cm )
 			info_var = path.get_var_info()
 
-			self.write("=> %s (0x%x) ---> %s->%s%s" % (info_var,
+			self.write(u"=> %s (0x%x) ---> %s->%s%s" % (info_var,
 													path.get_idx(),
 													dst_class_name,
 													dst_method_name,
@@ -197,7 +197,7 @@ class Writer :
 				src_class_name, src_method_name, src_descriptor =  path.get_src( cm )
 				dst_class_name, dst_method_name, dst_descriptor =  path.get_dst( cm )
 
-				self.write("=> %s->%s%s (0x%x) ---> %s->%s%s" % (src_class_name,
+				self.write(u"=> %s->%s%s (0x%x) ---> %s->%s%s" % (src_class_name,
 																src_method_name,
 																src_descriptor,
 																path.get_idx(),
@@ -209,7 +209,7 @@ class Writer :
 			else :
 				src_class_name, src_method_name, src_descriptor =  path.get_src( cm )
 
-				self.write("=> %s->%s%s (0x%x)" % (src_class_name,
+				self.write(u"=> %s->%s%s (0x%x)" % (src_class_name,
 												src_method_name,
 												src_descriptor,
 												path.get_idx()),
@@ -218,7 +218,7 @@ class Writer :
 	def show_Path_only_source(self, vm, path, indention_space_count=0) :
 		cm = vm.get_class_manager()
 		src_class_name, src_method_name, src_descriptor =  path.get_src( cm )
-		self.write("=> %s->%s%s" % (src_class_name, src_method_name, src_descriptor), indention_space_count)		
+		self.write(u"=> %s->%s%s" % (src_class_name, src_method_name, src_descriptor), indention_space_count)		
 
 	def show_Paths(self, vm, paths, indention_space_count=0) :
 		"""
@@ -242,7 +242,7 @@ class Writer :
 		m_idx = path[1]
 		method = vm.get_cm_method(m_idx)
 
-		self.write("=> %s->%s %s" % (method[0], method[1], method[2][0] + method[2][1]),	indention_space_count)
+		self.write(u"=> %s->%s %s" % (method[0], method[1], method[2][0] + method[2][1]),	indention_space_count)
 
 	#Output: stoping
 
