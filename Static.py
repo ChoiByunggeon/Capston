@@ -26,81 +26,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-"""
-	*****************************************************************************
-	** AndroBugs Framework - Android App Security Vulnerability Scanner        **
-	** This tool is created by Yu-Cheng Lin (a.k.a. AndroBugs) @ AndroBugs.com **
-	** Twitter: @AndroBugs                                                     **
-	** Email: androbugs.framework@gmail.com                                    **
-	*****************************************************************************
-
-	** Read Python codeing style first: http://www.python.org/dev/peps/pep-0008/ **
-
-	1.This script run under Python 2.7. DO NOT use Python 3.x
-
-	2.You need to install 'chilkat' component version in accordance with Python 2.7 first. This is for certificate checking.
-	  See the explanation of function 'def get_certificate(self, filename)' in 'apk.py' file
-	  => It becomes optional now. Since the related code is not comment out for ease of use and install.
-
-	3.Use command 'grep -nFr "#Added by AndroBugs" *' to see what AndroBugs Framework has added to Androguard Open Source project under "tools/modified/androguard" root directory.
-
-	4.Notice the "encoding" when copy and paste into this file (For example: the difference between single quote ' ).
-
-	5.** Notice: In AndroidManifest.xml => The value "TRUE" or "True" or "true" are all the same (e.g. [android:exported="TRUE"] equals to [android:exported="true"]). 
-	  So if you want to check whether it is true, you should MAKE IT LOWER first. Otherwise, your code may have security issues. **
-
-	Read these docs first:
-		1.http://s.android.com/tech/dalvik/dex-format.html
-		2.http://pallergabor.uw.hu/androidblog/dalvik_opcodes.html
-
-	Provide the user the options:
-		1.Specify the excluded package name (ex: Facebook.com, Parse.com) and put it into "STR_REGEXP_TYPE_EXCLUDE_CLASSES"
-		2.Show the "HTTP Connection" related code or not
-		3.Show the "KeyStore" related code or not
-
-	Flag:
-		[Critical] => very critical
-		[Warning]  => it's ok and not really need to change
-		[Notice]   => For hackers, you should notice.
-		[Info]	   => Information
-
-	You can use these functions provided by the FilteringEngine to exclude class packages:
-		(1)Filter single class name:
-			is_class_name_not_in_exclusion(single_class_name_string)
-
-		(2)Filter a list of class name:
-			filter_list_of_classes(class_name_list)
-
-		(3)Filter a list of method name:
-			filter_list_of_methods(method_list)
-
-		(4)Filter a list of Path:
-			filter_list_of_paths(d, path_list)  #a list of PathP
-
-		(5)Filter a list of Variables: #variables_list example: None or [[('R', 166), 5058]] or [[('R', 8), 5050], [('R', 24), 5046]]
-			filter_list_of_variables(d, variables_list)   
-
-		(6)Filter dictionary key classes: (filter the class names in the key)
-			(boolean) is_all_of_key_class_in_dict_not_in_exclusion(key)
-
-		(7) ...
-
-	Current self-defined error id:
-		 - fail_to_unzip_apk_file
-		 - apk_file_name_slash_twodots_error
-		 - apk_file_not_exist
-		 - package_name_empty
-		 - classes_dex_not_in_apk
-
-		 search the corresponding error by using MongoDB criteria " {"analyze_error_id":"[error_id]"} "
-
-	AndroBugs Framework is supported with MongoDB. Add "-s" argument if you want all the analysis results to be stored into the MongoDB.
-	Please check the "androbugs-db.cfg" file for database configuration.
-
-"""
-
 # Fix settings:
-
 TYPE_REPORT_OUTPUT_ONLY_PRINT = "print"
 TYPE_REPORT_OUTPUT_ONLY_FILE = "file"
 TYPE_REPORT_OUTPUT_PRINT_AND_FILE = "print_and_file"
@@ -112,7 +38,7 @@ ANALYZE_MODE_SINGLE = "single"
 ANALYZE_MODE_MASSIVE = "massive"
 
 # AndroidManifest permission protectionLevel constants
-PROTECTION_NORMAL = 0  # "normal" or not set
+PROTECTION_NORMAL = 0
 PROTECTION_DANGEROUS = 1
 PROTECTION_SIGNATURE = 2
 PROTECTION_SIGNATURE_OR_SYSTEM = 3
@@ -129,47 +55,30 @@ LEVEL_INFO = "Info"
 LINE_MAX_OUTPUT_CHARACTERS_WINDOWS = 160  # 100
 LINE_MAX_OUTPUT_CHARACTERS_LINUX = 160
 LINE_MAX_OUTPUT_INDENT = 20
-# -----------------------------------------------------------------------------------------------------
 
 # Customized settings:
-
 DEBUG = True
-ANALYZE_ENGINE_BUILD_DEFAULT = 1  # Analyze Engine(use only number)
+ANALYZE_ENGINE_BUILD_DEFAULT = 1
 
-DIRECTORY_APK_FILES = ""  # "APKs/"
+DIRECTORY_APK_FILES = ""
 
-REPORT_OUTPUT = TYPE_REPORT_OUTPUT_PRINT_AND_FILE  # when compiling to Windows executable, switch to "TYPE_REPORT_OUTPUT_ONLY_FILE"
-DIRECTORY_REPORT_OUTPUT = "Reports/"  # Only need to specify when (REPORT_OUTPUT = TYPE_REPORT_OUTPUT_ONLY_FILE) or (REPORT_OUTPUT = TYPE_REPORT_OUTPUT_PRINT_AND_FILE)
-# DIRECTORY_REPORT_OUTPUT = "Massive_Reports/"
-
-# -----------------------------------------------------------------------------------------------------
-"""
-Package for exclusion:
-Lcom/google/
-Lcom/aviary/android/
-Lcom/parse/
-Lcom/facebook/
-Lcom/tapjoy/
-Lcom/android/
-"""
+REPORT_OUTPUT = TYPE_REPORT_OUTPUT_PRINT_AND_FILE
+DIRECTORY_REPORT_OUTPUT = "Reports/"
 
 # The exclusion list settings will be loaded into FilteringEngine later
 STR_REGEXP_TYPE_EXCLUDE_CLASSES = "^(Landroid/support/|Lcom/actionbarsherlock/|Lorg/apache/)"
 ENABLE_EXCLUDE_CLASSES = True
-
-
-# -----------------------------------------------------------------------------------------------------
 
 class Writer:
 
     def __init__(self):
         self.__package_information = {}
         self.__cache_output_detail_stream = []
-        self.__output_dict_vector_result_information = {}  # Store the result information (key: tag ; value: information_for_each_vector)
-        self.__output_current_tag = ""  # The current vector analyzed
+        self.__output_dict_vector_result_information = {}
+        self.__output_current_tag = ""
 
-        self.__file_io_result_output_list = []  # Analyze vector result (for more convenient to save in disk)
-        self.__file_io_information_output_list = []  # Analyze header result (include package_name, md5, sha1, etc.)
+        self.__file_io_result_output_list = []
+        self.__file_io_information_output_list = []
 
     def simplifyClassPath(self, class_name):
         if class_name.startswith('L') and class_name.endswith(';'):
@@ -177,9 +86,6 @@ class Writer:
         return class_name
 
     def show_Path(self, vm, path, indention_space_count=0):
-        """
-            Different from analysis.show_Path, this "show_Path" writes to the tmp writer
-        """
 
         cm = vm.get_class_manager()
 
@@ -208,7 +114,7 @@ class Writer:
             else:
                 src_class_name, src_method_name, src_descriptor = path.get_src(cm)
 
-                self.write("Class => %s->%s%s (0x%x)" % (src_class_name,
+                self.write(u"Class--->%s \n    Method--->%s%s(0x%x)" % (src_class_name,
                                                    src_method_name,
                                                    src_descriptor,
                                                    path.get_idx()),
@@ -220,39 +126,17 @@ class Writer:
         self.write("=> %s->%s%s" % (src_class_name, src_method_name, src_descriptor), indention_space_count)
 
     def show_Paths(self, vm, paths, indention_space_count=0):
-        """
-            Show paths of packages
-            :param paths: a list of :class:`PathP` objects
-
-            Different from "analysis.show_Paths", this "show_Paths" writes to the tmp writer
-        """
         for path in paths:
             self.show_Path(vm, path, indention_space_count)
 
     def show_single_PathVariable(self, vm, path, indention_space_count=0):
-        """
-            Different from "analysis.show_single_PathVariable", this "show_single_PathVariable" writes to the tmp writer
-
-            method[0] : class name
-            method[1] : function name
-            method[2][0] + method[2][1]) : description
-        """
         access, idx = path[0]
         m_idx = path[1]
         method = vm.get_cm_method(m_idx)
 
-        self.write("=> %s->%s %s" % (method[0], method[1], method[2][0] + method[2][1]), indention_space_count)
-
-    # Output: stoping
+        self.write(u"Class--->%s \n    Method--->%s%s" % (method[0], method[1], method[2][0] + method[2][1]), indention_space_count)
 
     def startWriter(self, tag, level, summary, title_msg, special_tag=None, cve_number=""):
-        """
-            "tag" is for internal usage
-            "level, summary, title_msg, special_tag, cve_number" will be shown to the users
-            It will be sorted by the "tag". The result will be sorted by the "tag".
-
-            Notice: the type of "special_tag" is "list"
-        """
         self.completeWriter()
         self.__output_current_tag = tag
 
@@ -269,7 +153,7 @@ class Writer:
         dict_tmp_information["count"] = 0
         if special_tag:
             assert isinstance(special_tag, list), "Tag [" + tag + "] : special_tag should be list"
-            dict_tmp_information["special_tag"] = special_tag  # Notice: the type of "special_tag" is "list"
+            dict_tmp_information["special_tag"] = special_tag
         if cve_number:
             assert isinstance(cve_number, basestring), "Tag [" + tag + "] : special_tag should be string"
             dict_tmp_information["cve_number"] = cve_number
@@ -277,21 +161,12 @@ class Writer:
         self.__output_dict_vector_result_information[tag] = dict_tmp_information
 
     def get_valid_encoding_utf8_string(self, utf8_string):
-        """
-            unicode-escape: http://stackoverflow.com/questions/4004431/text-with-unicode-escape-sequences-to-unicode-in-python
-            Encoding and Decoding:
-                http://blog.wahahajk.com/2009/08/unicodedecodeerror-ascii-codec-cant.html
-                http://www.evanjones.ca/python-utf8.html
-                http://www.jb51.net/article/26543.htm
-                http://www.jb51.net/article/17560.htm
-        """
         return utf8_string.decode('unicode-escape').encode('utf8')
 
     def write(self, detail_msg, indention_space_count=0):
         self.__cache_output_detail_stream.append(detail_msg + "\n")
 
     def get_packed_analyzed_results_for_mongodb(self):
-        # For external storage
 
         analyze_packed_result = self.getInf()
 
@@ -303,7 +178,6 @@ class Writer:
         return None
 
     def get_search_enhanced_packed_analyzed_results_for_mongodb(self):
-        # For external storage
 
         analyze_packed_result = self.getInf()
 
@@ -342,31 +216,26 @@ class Writer:
         if key in self.__package_information:
             value = self.__package_information[key]
             if (value is None) and (
-                    default_value is not None):  # [Important] if default_value="", the result of the condition is "False"
+                    default_value is not None):
                 return default_value
             return value
 
-        # not found
-        if default_value:  # [Important] if default_value="", the result of the condition is "False"
+
+        if default_value:
             return default_value
 
         return None
 
     def writePlainInf(self, msg):
-        # if DEBUG :
         print(str(msg))
-        # [Recorded here]
         self.__file_io_information_output_list.append(str(msg))
 
     def writeInf(self, key, value, extra_title, extra_print_original_title=False):
-        # if DEBUG :
         if extra_print_original_title:
             print(str(extra_title))
-            # [Recorded here]
             self.__file_io_information_output_list.append(str(extra_title))
         else:
             print(extra_title + ": " + str(value))
-            # [Recorded here]
             self.__file_io_information_output_list.append(extra_title + ": " + str(value))
 
         self.__package_information[key] = value
@@ -386,31 +255,12 @@ class Writer:
         return 0
 
     def completeWriter(self):
-        # save to DB
         if (self.__cache_output_detail_stream) and (self.__output_current_tag != ""):
-            # This is the preferred way if you know that your variable is a string. If your variable could also be some other type then you should use myString == ""
 
             current_tag = self.__output_current_tag
-            # try :
             if current_tag in self.__output_dict_vector_result_information:
                 self.__output_dict_vector_result_information[current_tag]["count"] = len(
                     self.__cache_output_detail_stream)
-
-                """
-                    Use xxx.encode('string_escape') to avoid translating user code into command
-                    For example: regex in the code of users' applications may include "\n" but you should escape it.
-
-                    I add "str(xxx)" because the "xxx" of xxx.encode should be string but "line" is not string.
-                    Now the title and detail of the vectors are escaped(\n,...), so you need to use "get_valid_encoding_utf8_string"
-
-                    [String Escape Example] 
-                    http://stackoverflow.com/questions/6867588/how-to-convert-escaped-characters-in-python
-                    >>> escaped_str = 'One \\\'example\\\''
-                    >>> print escaped_str.encode('string_escape')
-                    One \\\'example\\\'
-                    >>> print escaped_str.decode('string_escape')
-                    One 'example'
-                """
 
                 output_string = ""
                 for line in self.__cache_output_detail_stream:
@@ -419,15 +269,9 @@ class Writer:
                 self.__output_dict_vector_result_information[current_tag][
                     "vector_details"] = self.get_valid_encoding_utf8_string(
                     output_string.rstrip(str('\n').encode('string_escape')))
-                '''try :
-                    self.__output_dict_vector_result_information[current_tag]["title"] = self.get_valid_encoding_utf8_string(self.__output_dict_vector_result_information[current_tag]["title"])
-                except KeyError :
-                    if DEBUG:
-                        print("[KeyError on \"self.__output_dict_vector_result_information\"]")
-                    pass'''
 
         self.__output_current_tag = ""
-        self.__cache_output_detail_stream[:] = []  # Clear the items in the list
+        self.__cache_output_detail_stream[:] = []
 
     def is_dict_information_has_cve_number(self, dict_information):
         if dict_information:
@@ -460,7 +304,6 @@ class Writer:
             return 1
 
     def append_to_file_io_information_output_list(self, line):
-        # Only write to the header of the "external" file
         self.__file_io_information_output_list.append(line)
 
     def save_result_to_file(self, output_file_path, args):
@@ -475,7 +318,7 @@ class Writer:
                 for line in self.__file_io_result_output_list:
                     f.write(line + "\n")
 
-            print("<<< Analysis report is generated: " + os.path.abspath(output_file_path) + " >>>")
+            print(u"파일이 생성되었습니다: " + os.path.abspath(output_file_path) + " >>>")
             print("")
 
             return True
@@ -492,33 +335,18 @@ class Writer:
             for line in self.__file_io_result_output_list:
                 print(line)
 
-    def output(self, line):  # Store here for later use on "print()" or "with ... open ..."
-        # [Recorded here]
-        self.__file_io_result_output_list.append(line)
+    def output(self, line):
+        if line.startswith('['):
+            self.__file_io_result_output_list.append("\n" + line)
+        else:
+            self.__file_io_result_output_list.append(line)
 
-    def output_and_force_print_console(self, line):  # Store here for later use on "print()" or "with ... open ..."
-        # [Recorded here]
+    def output_and_force_print_console(self, line):
         self.__file_io_result_output_list.append(line)
         print(line)
 
     def load_to_output_list(self, args):
-        """
-            tag => dict(level, title_msg, special_tag, cve_number)
-            tag => list(detail output)
-
-            print(self.__output_dict_vector_result_information)
-            print(self.__output_dict_vector_result_information["vector_details"])
-
-            Example output:
-                {'WEBVIEW_RCE': {'special_tag': ['WebView', 'Remote Code Execution'], 'title': "...", 'cve_number': 'CVE-2013-4710', 'level': 'critical'}}
-                "Lcom/android/mail/ui/ConversationViewFragment;->onCreateView(Landroid/view/LayoutInflater; Landroid/view/ViewGroup;
-                    Landroid/os/Bundle;)Landroid/view/View; (0xa4) ---> Lcom/android/mail/browse/ConversationWebView;->addJavascriptInterface(Ljava/lang/Object; Ljava/lang/String;)V"
-
-            "vector_details" is a detail string of a vector separated by "\n" controlled by the users
-
-        """
-
-        self.__file_io_result_output_list[:] = []  # clear the list
+        self.__file_io_result_output_list[:] = []
 
         wrapperTitle = TextWrapper(initial_indent=' ' * 11, subsequent_indent=' ' * 11,
                                    width=args.line_max_output_characters)
@@ -526,10 +354,10 @@ class Writer:
                                     width=args.line_max_output_characters)
 
         sorted_output_dict_result_information = collections.OrderedDict(
-            sorted(self.__output_dict_vector_result_information.items()))  # Sort the dictionary by key
+            sorted(self.__output_dict_vector_result_information.items()))
 
         for tag, dict_information in sorted(sorted_output_dict_result_information.items(), key=self.__sort_by_level,
-                                            reverse=True):  # Output the sorted dictionary by level
+                                            reverse=True):
             extra_field = ""
             if self.is_dict_information_has_special_tag(dict_information):
                 for i in dict_information["special_tag"]:
@@ -550,7 +378,7 @@ class Writer:
                 for line in dict_information["vector_details"].split('\n'):
                     self.output(wrapperDetail.fill(line))
 
-        self.output("------------------------------------------------------------")
+        self.output("------------------------------------------------------------------------------------------------")
 
         stopwatch_total_elapsed_time = self.getInf("time_total")
         stopwatch_analyze_time = self.getInf("time_analyze")
@@ -558,12 +386,12 @@ class Writer:
 
             if (REPORT_OUTPUT == TYPE_REPORT_OUTPUT_ONLY_FILE):
                 self.output_and_force_print_console(
-                    "AndroBugs analyzing time: " + str(stopwatch_analyze_time) + " secs")
+                    u"APK 분석 시간: " + str(stopwatch_analyze_time) + " secs")
                 self.output_and_force_print_console(
-                    "Total elapsed time: " + str(stopwatch_total_elapsed_time) + " secs")
+                    u"총 경과 시간: " + str(stopwatch_total_elapsed_time) + " secs")
             else:
-                self.output("AndroBugs analyzing time: " + str(stopwatch_analyze_time) + " secs")
-                self.output("Total elapsed time: " + str(stopwatch_total_elapsed_time) + " secs")
+                self.output(u"APK 분석 시간: " + str(stopwatch_analyze_time) + " secs")
+                self.output(u"총 경과 시간: " + str(stopwatch_total_elapsed_time) + " secs")
 
         if args.store_analysis_result_in_db:
 
@@ -588,84 +416,49 @@ class Writer:
 
 
 class EfficientStringSearchEngine:
-    """
-        Usage:
-            1.create an EfficientStringSearchEngine instance (only one should be enough)
-            2.addSearchItem
-            3.search
-            4.get_search_result_by_match_id or get_search_result_dict_key_classname_value_methodlist_by_match_id
-    """
-
     def __init__(self):
         self.__prog_list = []
         self.__dict_result_identifier_to_search_result_list = {}
 
     def addSearchItem(self, match_id, search_regex_or_fix_string_condition, isRegex):
-        self.__prog_list.append((match_id, search_regex_or_fix_string_condition, isRegex))  # "root" checking
+        self.__prog_list.append((match_id, search_regex_or_fix_string_condition, isRegex))
 
     def search(self, vm, allstrings_list):
-
-        """
-            Example prog list input:
-                [ ("match1", re.compile("PRAGMA\s*key\s*=", re.I), True), ("match2", re.compile("/system/bin/"), True), ("match3", "/system/bin/", False) ]
-
-            Example return (Will always return the corresponding key, but the value is return only when getting the result):
-                { "match1": [ (Complete_String_found, EncoddedMethod), (Complete_String_found, EncoddedMethod) ] , "match2": [] }
-        """
-
-        ## [String Search Performance Profiling]
-        # string_finding_start = datetime.now()
-
         self.__dict_result_identifier_to_search_result_list.clear()
 
-        for identifier, _, _ in self.__prog_list:  # initializing the return result list
+        for identifier, _, _ in self.__prog_list:
             if identifier not in self.__dict_result_identifier_to_search_result_list:
                 self.__dict_result_identifier_to_search_result_list[identifier] = []
 
         dict_string_value_to_idx_from_file_mapping = {}
 
-        for idx_from_file, string_value in vm.get_all_offset_from_file_and_string_value_mapping():  # get a dictionary of string value and string idx mapping
+        for idx_from_file, string_value in vm.get_all_offset_from_file_and_string_value_mapping():
             dict_string_value_to_idx_from_file_mapping[string_value] = idx_from_file
+        list_strings_idx_to_find = []
+        dict_string_idx_to_identifier = {}
 
-        ## [String Search Performance Profiling]
-        # string_loading_end = datetime.now()
-        # print("Time for loading String: " + str(((string_loading_end - string_finding_start).total_seconds())))
-
-        list_strings_idx_to_find = []  # string idx list
-        dict_string_idx_to_identifier = {}  # Example: (52368, "match1")
-
-        # Get the searched strings into search idxs
         for line in allstrings_list:
             for identifier, regexp, isRegex in self.__prog_list:
                 if (isRegex and regexp.search(line)) or ((not isRegex) and (regexp == line)):
-                    if line in dict_string_value_to_idx_from_file_mapping:  # Find idx by string
+                    if line in dict_string_value_to_idx_from_file_mapping:
                         string_idx = dict_string_value_to_idx_from_file_mapping[line]
                         list_strings_idx_to_find.append(string_idx)
                         dict_string_idx_to_identifier[string_idx] = identifier
 
-        list_strings_idx_to_find = set(list_strings_idx_to_find)  # strip duplicated items
-
-        ## [String Search Performance Profiling]
-        # string_finding_end = datetime.now()
-        # print("Time for finding String: " + str((string_finding_end - string_finding_start).total_seconds()))
+        list_strings_idx_to_find = set(list_strings_idx_to_find)
 
         if list_strings_idx_to_find:
             cm = vm.get_class_manager()
             for method in vm.get_methods():
-                for i in method.get_instructions():  # method.get_instructions(): Instruction
+                for i in method.get_instructions():
                     if (i.get_op_value() == 0x1A) or (
-                            i.get_op_value() == 0x1B):  # 0x1A = "const-string", 0x1B = "const-string/jumbo"
+                            i.get_op_value() == 0x1B):
                         ref_kind_idx = cm.get_offset_idx_by_from_file_top_idx(i.get_ref_kind())
-                        if ref_kind_idx in list_strings_idx_to_find:  # find string_idx in string_idx_list
+                        if ref_kind_idx in list_strings_idx_to_find:
                             if ref_kind_idx in dict_string_idx_to_identifier:
                                 original_identifier_name = dict_string_idx_to_identifier[ref_kind_idx]
                                 self.__dict_result_identifier_to_search_result_list[original_identifier_name].append(
                                     (i.get_string(), method))
-
-        ## [String Search Performance Profiling]
-        # elapsed_string_finding_time = datetime.now() - string_finding_start
-        # print("String Search Elapsed time: " + str(elapsed_string_finding_time.total_seconds()))
-        # print("------------------------------------------------------------")
 
         return self.__dict_result_identifier_to_search_result_list
 
@@ -673,19 +466,15 @@ class EfficientStringSearchEngine:
         return self.__dict_result_identifier_to_search_result_list[match_id]
 
     def get_search_result_dict_key_classname_value_methodlist_by_match_id(self, match_id):
-        """
-            Input: [ (Complete_String_found, EncoddedMethod), (Complete_String_found, EncoddedMethod) ] or []
-            Output: dicionary key by class name
-        """
         dict_result = {}
 
         search_result_value = self.__dict_result_identifier_to_search_result_list[match_id]
 
         try:
-            if search_result_value:  # Found the corresponding url in the code
+            if search_result_value:
                 result_list = set(search_result_value)
 
-                for _, result_method in result_list:  # strip duplicated item
+                for _, result_method in result_list:
                     class_name = result_method.get_class_name()
                     if class_name not in dict_result:
                         dict_result[class_name] = []
@@ -734,7 +523,7 @@ class FilteringEngine:
         if self.__enable_exclude_classes:
             isAllMatchExclusion = True
             for class_name, method_list in dict_result.items():
-                if not self.__regexp_excluded_classes.match(class_name):  # any match
+                if not self.__regexp_excluded_classes.match(class_name):
                     isAllMatchExclusion = False
 
             if isAllMatchExclusion:
@@ -790,9 +579,6 @@ class FilteringEngine:
         return l
 
     def filter_list_of_variables(self, vm, paths):
-        """
-            Example paths input: [[('R', 8), 5050], [('R', 24), 5046]]
-        """
 
         if self.__enable_exclude_classes and paths:
             l = []
@@ -809,12 +595,12 @@ class FilteringEngine:
             return paths
 
     def get_class_container_dict_by_new_instance_classname_in_paths(self, vm, analysis, paths,
-                                                                    result_idx):  # dic: key=>class_name, value=>paths
+                                                                    result_idx):
         dic_classname_to_paths = {}
         paths = self.filter_list_of_paths(vm, paths)
         for i in analysis.trace_Register_value_by_Param_in_source_Paths(vm, paths):
             if (i.getResult()[result_idx] is None) or (
-            not i.is_class_container(result_idx)):  # If parameter 0 is a class_container type (ex: Lclass/name;)
+            not i.is_class_container(result_idx)):
                 continue
             class_container = i.getResult()[result_idx]
             class_name = class_container.get_class_name()
@@ -944,10 +730,6 @@ def get_method_ins_by_superclass_and_method(vm, super_classes, method_name, meth
 
 def get_method_ins_by_implement_interface_and_method(vm, implement_interface, compare_type, method_name,
                                                      method_descriptor):
-    """
-        Example result:
-            (Ljavax/net/ssl/HostnameVerifier; Ljava/io/Serializable;)
-    """
 
     for cls in vm.get_classes():
         if is_class_implements_interface(cls, implement_interface, compare_type):
@@ -985,15 +767,6 @@ def is_kind_string_in_ins_method(method, kind_string):
 
 
 def get_all_components_by_permission(xml, permission):
-    """
-        Return:
-            (1) activity
-            (2) activity-alias
-            (3) service
-            (4) receiver
-            (5) provider
-        who use the specific permission
-    """
 
     find_tags = ["activity", "activity-alias", "service", "receiver", "provider"]
     dict_perms = {}
@@ -1039,13 +812,7 @@ def parseArgument():
 
 
 def __analyze(writer, args):
-    """
-        Exception:
-            apk_file_not_exist
-            classes_dex_not_in_apk
-    """
 
-    # StopWatch: Counting execution time...
     stopwatch_start = datetime.now()
 
     efficientStringSearchEngine = EfficientStringSearchEngine()
@@ -1088,13 +855,7 @@ def __analyze(writer, args):
         if not found_pymongo_lib:
             pass
 
-        # Cause some unexpected behavior on Linux => Temporarily comment it out
-        # raise ExpectedException("libs_not_found_pymongo", "Python library \"pymongo\" is not found. Please install the library first: http://api.mongodb.org/python/current/installation.html.")
-
-    # apk_filepath_relative = apk_Path
     apk_filepath_absolute = os.path.abspath(apk_Path)
-
-    # writer.writeInf_ForceNoPrint("apk_filepath_relative", apk_filepath_relative)
     writer.writeInf_ForceNoPrint("apk_filepath_absolute", apk_filepath_absolute)
 
     apk_file_size = float(os.path.getsize(apk_filepath_absolute)) / (1024 * 1024)
@@ -1113,28 +874,26 @@ def __analyze(writer, args):
     if isNullOrEmptyString(package_name, True):
         raise ExpectedException("package_name_empty", u"Package이름이 존재하지 않습니다. (File: " + apk_Path + ").")
 
-    writer.writeInf("platform", "Android", "Platform")
-    writer.writeInf("package_name", str(package_name), "Package Name")
+    writer.writeInf("platform", "Android", u"플랫폼")
+    writer.writeInf("package_name", str(package_name), u"APK 이름")
 
     # Check: http://developer.android.com/guide/topics/manifest/manifest-element.html
     if not isNullOrEmptyString(a.get_androidversion_name()):
         try:
-            writer.writeInf("package_version_name", str(a.get_androidversion_name()), "Package Version Name")
+            writer.writeInf("package_version_name", str(a.get_androidversion_name()), u"APK 버전 이름")
         except:
             writer.writeInf("package_version_name", a.get_androidversion_name().encode('ascii', 'ignore'),
-                            "Package Version Name")
+                            u"APK 버전 이름")
 
     if not isNullOrEmptyString(a.get_androidversion_code()):
-        # The version number shown to users. This attribute can be set as a raw string or as a reference to a string resource.
-        # The string has no other purpose than to be displayed to users.
         try:
-            writer.writeInf("package_version_code", int(a.get_androidversion_code()), "Package Version Code")
+            writer.writeInf("package_version_code", int(a.get_androidversion_code()), u"APK 버전 코드")
         except ValueError:
-            writer.writeInf("package_version_code", a.get_androidversion_code(), "Package Version Code")
+            writer.writeInf("package_version_code", a.get_androidversion_code(), u"APK 버전 코드")
 
     if len(a.get_dex()) == 0:
         raise ExpectedException("classes_dex_not_in_apk",
-                                u"APK 파일이 손상되었습니다. \"filename.pilename\" 파일을 찾을 수 없습니다. (File: " + apk_Path + ").")
+                                "APK 파일이 손상되었습니다. \"filename.pilename\" 파일을 찾을 수 없습니다. (File: " + apk_Path + ").")
 
     try:
         str_min_sdk_version = a.get_min_sdk_version()
@@ -1144,8 +903,6 @@ def __analyze(writer, args):
             int_min_sdk = int(str_min_sdk_version)
             writer.writeInf("minSdk", int_min_sdk, "Min Sdk")
     except ValueError:
-        # Check: http://developer.android.com/guide/topics/manifest/uses-sdk-element.html
-        # If "minSdk" is not set, the default value is "1"
         writer.writeInf("minSdk", 1, "Min Sdk")
         int_min_sdk = 1
 
@@ -1157,8 +914,6 @@ def __analyze(writer, args):
             int_target_sdk = int(str_target_sdk_version)
             writer.writeInf("targetSdk", int_target_sdk, "Target Sdk")
     except ValueError:
-        # Check: http://developer.android.com/guide/topics/manifest/uses-sdk-element.html
-        # If not set, the default value equals that given to minSdkVersion.
         int_target_sdk = int_min_sdk
 
     md5, sha1, sha256, sha512 = get_hashes_by_filename(APK_FILE_NAME_STRING)
@@ -1179,24 +934,20 @@ def __analyze(writer, args):
 
     analyze_start = datetime.now()
 
-    # ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     all_permissions = a.get_permissions()
 
     allstrings = d.get_strings()
     allurls_strip_duplicated = []
 
-    # ------------------------------------------------------------------------
-    # [Important: String Efficient Searching Engine]
-    # >>>>STRING_SEARCH<<<<
-    # addSearchItem params: (1)match_id  (2)regex or string(url or string you want to find), (3)is using regex for parameter 2
     efficientStringSearchEngine.addSearchItem("$__possibly_check_root__", re.compile("/system/bin"),
                                               True)  # "root" checking
     efficientStringSearchEngine.addSearchItem("$__possibly_check_su__", "su", False)  # "root" checking2
     efficientStringSearchEngine.addSearchItem("$__sqlite_encryption__", re.compile("PRAGMA\s*key\s*=", re.I),
                                               True)  # SQLite encryption checking
 
-    print("------------------------------------------------------------")
+    print("------------------------------------------------------------------------------------------------")
 
     # Print all urls without SSL:
 
@@ -1210,7 +961,7 @@ def __analyze(writer, args):
                             "http://hostname/"]
 
     for line in allstrings:
-        if re.match('http\:\/\/(.+)', line):  # ^https?\:\/\/(.+)$
+        if re.match('http\:\/\/(.+)', line):
             allurls_strip_duplicated.append(line)
 
     allurls_strip_non_duplicated = sorted(set(allurls_strip_duplicated))
@@ -1230,11 +981,9 @@ def __analyze(writer, args):
                     (not url.endswith("-handler")) and \
                     (not url.endswith("-instance")):
                 # >>>>STRING_SEARCH<<<<
-                efficientStringSearchEngine.addSearchItem(url, url, False)  # use url as "key"
+                efficientStringSearchEngine.addSearchItem(url, url, False)
 
                 allurls_strip_non_duplicated_final.append(url)
-
-    # ------------------------------------------------------------------------
 
     # Base64 String decoding:
     list_base64_success_decoded_string_to_original_mapping = {}
@@ -1258,8 +1007,6 @@ def __analyze(writer, args):
     # ------------------------------------------------------------------------
 
     # >>>>STRING_SEARCH<<<<
-
-    # start the search core engine
     efficientStringSearchEngine.search(d, allstrings)
 
     # ------------------------------------------------------------------------
@@ -1287,13 +1034,12 @@ def __analyze(writer, args):
             writer.write(url)
 
             try:
-                if dict_class_to_method_mapping:  # Found the corresponding url in the code
+                if dict_class_to_method_mapping:
                     for _, result_method_list in dict_class_to_method_mapping.items():
                         for result_method in result_method_list:  # strip duplicated item
                             if filteringEngine.is_class_name_not_in_exclusion(result_method.get_class_name()):
                                 source_classes_and_functions = (
                                             result_method.get_class_name() + "->" + result_method.get_name() + result_method.get_descriptor())
-                                #writer.write("    => " + source_classes_and_functions)
 
             except KeyError:
                 pass
@@ -1306,7 +1052,7 @@ def __analyze(writer, args):
     # --------------------------------------------------------------------
 
     regexGerneralRestricted = ".*(config|setting|constant).*";
-    regexSecurityRestricted = ".*(encrypt|decrypt|encod|decod|aes|sha1|sha256|sha512|md5).*"  # No need to add "sha1" and "des"
+    regexSecurityRestricted = ".*(encrypt|decrypt|encod|decod|aes|sha1|sha256|sha512|md5).*"
     # show the user which package is excluded
 
     prog = re.compile(regexGerneralRestricted, re.I)
@@ -1314,7 +1060,7 @@ def __analyze(writer, args):
 
     # Security methods finding:
 
-    if args.extra == 2:  # The output may be too verbose, so make it an option
+    if args.extra == 2:
 
         list_security_related_methods = []
 
@@ -1338,7 +1084,7 @@ def __analyze(writer, args):
 
     # Security classes finding:
 
-    if args.extra == 2:  # The output may be too verbose, so make it an option
+    if args.extra == 2:
         list_security_related_classes = []
 
         for current_class in d.get_classes():
@@ -1376,35 +1122,6 @@ def __analyze(writer, args):
                            "CVE-2013-4787")
 
     # ------------------------------------------------------------------------------------------------------
-    # Certificate checking (Prerequisite: 1.directory name "tmp" available  2.keytool command is available)
-
-    # Comment out this code because chilkat may not be supported easily by every Linux
-    # You can uncomment it if you have successfully installed the chilkat
-
-    """
-    import chilkat
-
-    rsa_signature_filename = a.get_signature_name()    #a.get_signature_name() return a signature file name
-
-    if rsa_signature_filename is None:
-        writer.startWriter("CERT_SIGNED", LEVEL_CRITICAL, "Android App Signature", "This app is not signed. It can not be installed or upgraded on Android system.", ["Signature"])
-    else:
-        try:
-            success, cert = a.get_certificate(rsa_signature_filename)
-            if success:
-                if (cert.subjectCN() == 'Android Debug') or (cert.issuerCN() == 'Android Debug') :
-                    writer.startWriter("CERT_SIGNED", LEVEL_CRITICAL, "Android App Signature", "This app is signed by 'Android Debug' certificate which is only for testing. DO NOT release this app in production!", ["Signature"])
-                else:
-                    writer.startWriter("CERT_SIGNED", LEVEL_INFO, "Android App Signature", "This app is signed by your own certificate (SubjectCN: %s, IssuerCN: %s)." % (cert.subjectCN(), cert.issuerCN()), ["Signature"])
-            else:
-                writer.startWriter("CERT_SIGNED", LEVEL_INFO, "Android App Signature", "We cannot tell whether the app is signed or not because we are unable to load the certificate of app.", ["Signature"])
-
-        except IOError:
-            pass
-    """
-
-    # ------------------------------------------------------------------------------------------------------
-
     # DEBUGGABLE checking:
 
     is_debug_open = a.is_debuggable()  # Check 'android:debuggable'
@@ -1420,27 +1137,6 @@ def __analyze(writer, args):
     # ------------------------------------------------------------------------------------------------------
 
     # Checking whether the app is checking debuggable:
-
-    """
-        Java code checking debuggable:
-            boolean isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-            if (isDebuggable) { }
-
-        Smali code checking debuggable:
-            invoke-virtual {p0}, Lcom/example/androiddebuggable/MainActivity;->getApplicationInfo()Landroid/content/pm/ApplicationInfo;
-            move-result-object v1
-            iget v1, v1, Landroid/content/pm/ApplicationInfo;->flags:I
-            and-int/lit8 v1, v1, 0x2
-            if-eqz v1, :cond_0
-
-        Checking Pattern:
-            1. Find tainted calling field: Landroid/content/pm/ApplicationInfo;->flags:I
-            2. Get the next instruction of the calling field: Landroid/content/pm/ApplicationInfo;->flags:I
-            3. Check whether the next instruction is 0xDD(and-int/lit8) and make sure the register numbers are all matched
-                iget [[v1]], v1, [[[Landroid/content/pm/ApplicationInfo;->flags:I]]]
-                and-int/lit8 v1, [[v1]], [0x2]
-
-    """
     list_detected_FLAG_DEBUGGABLE_path = []
     field_ApplicationInfo_flags_debuggable = vmx.get_tainted_field("Landroid/content/pm/ApplicationInfo;", "flags", "I")
 
@@ -1455,20 +1151,6 @@ def __analyze(writer, args):
                     if (last_one_ins[0] == 0xDD) and (last_two_ins[1][0][1] == last_one_ins[1][1][1]) and (
                             last_one_ins[1][2][1] == 2):  # and-int/lit8 vx,vy,lit8
                         list_detected_FLAG_DEBUGGABLE_path.append(path)
-                    """
-                        Example 1:
-                            last_two_ins => [82, [(0, 1), (0, 1), (258, 16, 'Landroid/content/pm/ApplicationInfo;->flags I')]]
-                            last_one_ins => [221, [(0, 1), (0, 1), (1, 2)]]
-
-                        Example 2:
-                            last_two_ins => [82, [(0, 2), (0, 0), (258, 896, 'Landroid/content/pm/ApplicationInfo;->flags I')]]
-                            last_one_ins => [221, [(0, 2), (0, 2), (1, 2)]]
-
-                        Java code:
-                            stack.show()
-                            print(last_one_ins)
-                            print(last_two_ins)
-                    """
                 except:
                     pass
 
@@ -1547,7 +1229,7 @@ def __analyze(writer, args):
 
     isSuggestGCM = False
     if int_min_sdk is not None:
-        if int_min_sdk < 8:  # Android 2.2=SDK 8
+        if int_min_sdk < 8:
             isSuggestGCM = True
 
     if isSuggestGCM:
@@ -1577,17 +1259,6 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
     pkg_DefaultHttpClient = filteringEngine.filter_list_of_paths(d, pkg_DefaultHttpClient)
     pkg_HttpClient = filteringEngine.filter_list_of_paths(d, pkg_HttpClient)
 
-    # size_pkg_URLConnection = len(pkg_URLConnection)
-    # size_pkg_HttpURLConnection = len(pkg_HttpURLConnection)
-    # size_pkg_HttpsURLConnection = len(pkg_HttpsURLConnection)
-    # size_pkg_DefaultHttpClient = len(pkg_DefaultHttpClient)
-    # size_pkg_HttpClient = len(pkg_HttpClient)
-
-    # Provide 2 options for users:
-    # 1.Show the network-related class or not
-    # 2.Exclude 'Lcom/google/' package or 'Lcom/facebook/' package  or not
-    # **Should Make the output path sorted by class name
-
     if pkg_URLConnection or pkg_HttpURLConnection or pkg_HttpsURLConnection or pkg_DefaultHttpClient or pkg_HttpClient:
 
         if "android.permission.INTERNET" in all_permissions:
@@ -1597,27 +1268,6 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
         else:
             writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_CRITICAL, u"인터넷 접근 검사",
                                u"이 앱에는 일부 인터넷 액세스 코드가 있지만 AndroidManifest안에 있는 'android.permission.INTERNET'이 설정되어 있지 않습니다.")
-
-    # if pkg_URLConnection:
-    # 	print("        =>URLConnection:")
-    # 	analysis.show_Paths(d, pkg_URLConnection)
-    # 	print
-    # if pkg_HttpURLConnection:
-    # 	print("        =>HttpURLConnection:")
-    # 	analysis.show_Paths(d, pkg_HttpURLConnection)
-    # 	print
-    # if pkg_HttpsURLConnection:
-    # 	print("        =>HttpsURLConnection:")
-    # 	analysis.show_Paths(d, pkg_HttpsURLConnection)
-    # 	print
-    # if pkg_DefaultHttpClient:
-    # 	print("        =>DefaultHttpClient:")
-    # 	analysis.show_Paths(d, pkg_DefaultHttpClient)
-    # 	print
-    # if pkg_HttpClient:
-    # 	print("        =>HttpClient:")
-    # 	analysis.show_Paths(d, pkg_HttpClient)
-    # 	print
 
     else:
         writer.startWriter("USE_PERMISSION_INTERNET", LEVEL_INFO, u"인터넷 접근 검사", u"HTTP 관련 연결 코드를 찾을 수 없습니다.")
@@ -1638,7 +1288,7 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
             organized_list_base64_success_decoded_string_to_original_mapping.append(
                 (decoded_string, original_string, dict_class_to_method_mapping))
 
-    if organized_list_base64_success_decoded_string_to_original_mapping:  # The result is from the upper code section
+    if organized_list_base64_success_decoded_string_to_original_mapping:
 
         list_base64_decoded_urls = {}
 
@@ -1674,7 +1324,7 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
                     original_string)
 
                 if not filteringEngine.is_all_of_key_class_in_dict_not_in_exclusion(
-                        dict_class_to_method_mapping):  # All of the same string found are inside the excluded packages
+                        dict_class_to_method_mapping):
                     continue
 
                 writer.write(decoded_string)
@@ -1693,21 +1343,23 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 
     # ------------------------------------------------------------------------
     # WebView addJavascriptInterface checking:
-
-    # Don't match class name because it might use the subclass of WebView
     path_WebView_addJavascriptInterface = vmx.get_tainted_packages().search_methods_exact_match(
         "addJavascriptInterface", "(Ljava/lang/Object; Ljava/lang/String;)V")
     path_WebView_addJavascriptInterface = filteringEngine.filter_list_of_paths(d, path_WebView_addJavascriptInterface)
 
     if path_WebView_addJavascriptInterface:
 
-        output_string = u"""중요한 WebView "addJavascriptInterface"취약성을 찾았습니다. \n이 메서드를 사용하여 JavaScript가 호스트 응용 프로그램을 제어할 수 있습니다. 
-이것은 강력한 기능이지만 자바스크립트가 삽입된 객체의 공개 필드에 접근하기 위해 반사를 사용할 수 있기 때문에 \nAPI 수준 JELLY_BEAN(4.2) 이하를 대상으로 하는 애플리케이션의 보안 위험도 있다. \n신뢰할 수 없는 콘텐츠를 포함하는 WebView에서 이 메서드를 사용하면 공격자가 의도하지 않은 방법으로 호스트 응용 프로그램을 조작하여 \n호스트 응용 프로그램의 권한으로 Java 코드를 실행할 수 있습니다.
+        output_string = u"""중요한 WebView "addJavascriptInterface"취약성을 찾았습니다.
+이 메서드를 사용하여 JavaScript가 호스트 응용 프로그램을 제어할 수 있습니다. 
+이것은 강력한 기능이지만 자바스크립트가 삽입된 객체의 공개 필드에 접근하기 위해 반사를 사용할 수 있기 때문에
+API 수준 JELLY_BEAN(4.2) 이하를 대상으로 하는 애플리케이션의 보안 위험도 있습니다.
+신뢰할 수 없는 콘텐츠를 포함하는 WebView에서 이 메서드를 사용하면 공격자가 의도하지 않은 방법으로 호스트 응용 프로그램을 조작하여
+호스트 응용 프로그램의 권한으로 Java 코드를 실행할 수 있습니다.
 참조: 
-  1."http://developer.android.com/reference/android/webkit/WebView.html#addJavascriptInterface"
-  2.https://labs.mwrinfosecurity.com/blog/2013/09/24/webview-addjavascriptinterface-remote-code-execution/
-  3.http://50.56.33.56/blog/?p=314
-  4.http://blog.trustlook.com/2013/09/04/alert-android-webview-addjavascriptinterface-code-execution-vulnerability/
+1.http://developer.android.com/reference/android/webkit/WebView.html#addJavascriptInterface
+2.https://labs.mwrinfosecurity.com/blog/2013/09/24/webview-addjavascriptinterface-remote-code-execution/
+3.http://50.56.33.56/blog/?p=314
+4.http://blog.trustlook.com/2013/09/04/alert-android-webview-addjavascriptinterface-code-execution-vulnerability/
 아래 코드를 수정하세요.:"""
 
         writer.startWriter("WEBVIEW_RCE", LEVEL_CRITICAL, u"WebView RCE 취약점 검사", output_string,
@@ -1823,12 +1475,6 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
     # ------------------------------------------------------------------------
     # BKS KeyStore checking:
 
-    """
-        Example:
-        const-string v11, "BKS"
-        invoke-static {v11}, Ljava/security/KeyStore;->getInstance(Ljava/lang/String;)Ljava/security/KeyStore;
-    """
-
     list_Non_BKS_keystore = []
     path_BKS_KeyStore = vmx.get_tainted_packages().search_class_methods_exact_match("Ljava/security/KeyStore;",
                                                                                     "getInstance",
@@ -1885,18 +1531,6 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
     # ------------------------------------------------------------------------
     # Developers preventing screenshot capturing checking:
 
-    """
-        Example:
-            const/16 v1, 0x2000
-            invoke-super {p0, p1}, Landroid/support/v7/app/AppCompatActivity;->onCreate(Landroid/os/Bundle;)V
-            invoke-virtual {p0}, Lcom/example/preventscreencapture/MainActivity;->getWindow()Landroid/view/Window;
-            move-result-object v0
-            invoke-virtual {v0, v1, v1}, Landroid/view/Window;->setFlags(II)V
-
-
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-    """
-
     list_code_for_preventing_screen_capture = []
     path_code_for_preventing_screen_capture = vmx.get_tainted_packages().search_class_methods_exact_match(
         "Landroid/view/Window;", "setFlags", "(I I)V")
@@ -1923,16 +1557,6 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
 
     # ------------------------------------------------------------------------
     # Runtime exec checking:
-
-    """
-        Example Java code:
-            1. Runtime.getRuntime().exec("");
-            2. Runtime rr = Runtime.getRuntime(); Process p = rr.exec("ls -al");
-
-        Example Bytecode code (The same bytecode for those two Java code):
-            const-string v2, "ls -al"
-            invoke-virtual {v1, v2}, Ljava/lang/Runtime;->exec(Ljava/lang/String;)Ljava/lang/Process;
-    """
 
     list_Runtime_exec = []
 
@@ -1966,25 +1590,6 @@ You are now allowing minSdk버전을 8보다 낮은 버전을 사용하고 있�
     # -------------------------------------------------------
 
     # HTTPS ALLOW_ALL_HOSTNAME_VERIFIER checking:
-
-    """
-        Example Java code:
-            HttpsURLConnection.setDefaultHostnameVerifier(org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
-        Example Bytecode code (The same bytecode for those two Java code):	
-            (1)
-            sget-object v11, Lorg/apache/http/conn/ssl/SSLSocketFactory;->ALLOW_ALL_HOSTNAME_VERIFIER:Lorg/apache/http/conn/ssl/X509HostnameVerifier;
-            invoke-static {v11}, Ljavax/net/ssl/HttpsURLConnection;->setDefaultHostnameVerifier(Ljavax/net/ssl/HostnameVerifier;)V
-
-            (2)
-               new-instance v11, Lcom/example/androidsslconnecttofbtest/MainActivity$2;
-            invoke-direct {v11, p0}, Lcom/example/androidsslconnecttofbtest/MainActivity$2;-><init>(Lcom/example/androidsslconnecttofbtest/MainActivity;)V
-            invoke-static {v11}, Ljavax/net/ssl/HttpsURLConnection;->setDefaultHostnameVerifier(Ljavax/net/ssl/HostnameVerifier;)V
-
-        Scenario:
-            https://www.google.com/  => Google (SSL certificate is valid, CN: www.google.com)
-            https://60.199.175.18   => IP of Google (SSL certificate is invalid, See Chrome error message.
-    """
 
     # (1)inner class checking
 
@@ -2027,8 +1632,8 @@ OWASP Mobile top 10개 문서: https://www.owasp.org/index.php/Mobile_Top_10_201
 
 CN(Common Name) 인증의 중요도를 확인합니다.
 Google Chrome을 사용하여 탐색:
- - https://www.google.com   => SSL 인증서가 유효함
- - https://60.199.175.158/  => Google.com의 IP 주소이지만 CN이 일치하지 않아 인증서가 유효하지 않습니다. Google.com으로 이동할 수 있지만 공격자와 일반 사용자를 구분할 수 없습니다.
+- https://www.google.com   => SSL 인증서가 유효함
+- https://60.199.175.158/  => Google.com의 IP 주소이지만 CN이 일치하지 않아 인증서가 유효하지 않습니다. Google.com으로 이동할 수 있지만 공격자와 일반 사용자를 구분할 수 없습니다.
 
 다음 메서드의 코드를 확인하십시오.:"""
 
@@ -2046,7 +1651,6 @@ Google Chrome을 사용하여 탐색:
         writer.startWriter("SSL_CN1", LEVEL_INFO, u"SSL 구현 검사(사용자 지정 클래스에서 호스트  확인)",
                            u"자체 정의된 HOSTNAME VERIFIER 검사 확인.", ["SSL_Security"])
 
-    # (2)ALLOW_ALL_HOSTNAME_VERIFIER fields checking
 
     if "Lorg/apache/http/conn/ssl/AllowAllHostnameVerifier;" in dic_path_HOSTNAME_INNER_VERIFIER_new_instance:
         path_HOSTNAME_INNER_VERIFIER_new_instance = dic_path_HOSTNAME_INNER_VERIFIER_new_instance[
@@ -2054,7 +1658,6 @@ Google Chrome을 사용하여 탐색:
     else:
         path_HOSTNAME_INNER_VERIFIER_new_instance = None
 
-    # "vmx.get_tainted_field" will return "None" if nothing found
     field_ALLOW_ALL_HOSTNAME_VERIFIER = vmx.get_tainted_field("Lorg/apache/http/conn/ssl/SSLSocketFactory;",
                                                               "ALLOW_ALL_HOSTNAME_VERIFIER",
                                                               "Lorg/apache/http/conn/ssl/X509HostnameVerifier;")
@@ -2078,30 +1681,19 @@ OWASP Mobile top 10개 문서: https://www.owasp.org/index.php/Mobile_Top_10_201
 
 CN(Common Name) 인증의 중요도를 확인합니다.
 Google Chrome을 사용하여 탐색:
- - https://www.google.com   => SSL 인증서가 유효함
- - https://60.199.175.158/  => Google.com의 IP 주소이지만 CN이 일치하지 않아 인증서가 유효하지 않습니다. Google.com으로 이동할 수 있지만 공격자와 일반 사용자를 구분할 수 없습니다.
+- https://www.google.com   => SSL 인증서가 유효함
+- https://60.199.175.158/  => Google.com의 IP 주소이지만 CN이 일치하지 않아 인증서가 유효하지 않습니다. Google.com으로 이동할 수 있지만 공격자와 일반 사용자를 구분할 수 없습니다.
 
 다음 메서드의 코드를 확인하십시오.:"""
 
         writer.startWriter("SSL_CN2", LEVEL_CRITICAL, u"SSL 구현 검사(필드에서 호스트 이름 확인)", output_string, ["SSL_Security"])
 
         if filtered_ALLOW_ALL_HOSTNAME_VERIFIER_paths:
-            """
-                Example code: 
-                SSLSocketFactory factory = SSLSocketFactory.getSocketFactory();
-                factory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-            """
 
             for path in filtered_ALLOW_ALL_HOSTNAME_VERIFIER_paths:
                 writer.show_single_PathVariable(d, path)
 
         if path_HOSTNAME_INNER_VERIFIER_new_instance:
-            """
-                Example code: 
-                SSLSocketFactory factory = SSLSocketFactory.getSocketFactory();
-                factory.setHostnameVerifier(new AllowAllHostnameVerifier());
-            """
-            # For this one, the exclusion procedure is done on earlier
             writer.show_Paths(d, path_HOSTNAME_INNER_VERIFIER_new_instance)
     else:
         writer.startWriter("SSL_CN2", LEVEL_INFO, u"SSL 구현 검사(필드에서 호스트 이름 확인)",
@@ -2121,7 +1713,8 @@ Google Chrome을 사용하여 탐색:
     if path_getInsecure:
 
         output_string = u"""이 팩토리를 사용하여 만든 소켓(안전하지 않은 메서드 "getInsecure")은 man-in-the-middle attacks에 취약합니다. 
-참조를 확인하십시오: http://developer.android.com/reference/android/net/SSLCertificateSocketFactory.html#getInsecure(int, android.net.SSLSessionCache). 
+참조를 확인하십시오: 
+http://developer.android.com/reference/android/net/SSLCertificateSocketFactory.html#getInsecure(int, android.net.SSLSessionCache). 
 안전하지 않은 코드를 제거하십시오.:"""
 
         writer.startWriter("SSL_CN3", LEVEL_CRITICAL, u"SSL 구현 검사(필드에서 호스트 이름 확인)", output_string, ["SSL_Security"])
@@ -2131,20 +1724,7 @@ Google Chrome을 사용하여 탐색:
                            u"안전하지 않은 메서드 \"getInsecure\"로 SSLocketFactory를 검색하지 못했습니다.", ["SSL_Security"])
 
     # -------------------------------------------------------
-
     # HttpHost default scheme "http"
-
-    """
-        Check this paper to see why I designed this vector: "The Most Dangerous Code in the World: Validating SSL Certificates in Non-Browser Software"
-
-
-        Java Example code:
-            HttpHost target = new HttpHost(uri.getHost(), uri.getPort(), HttpHost.DEFAULT_SCHEME_NAME);
-
-        Smali Example code:
-            const-string v4, "http"
-            invoke-direct {v0, v2, v3, v4}, Lorg/apache/http/HttpHost;-><init>(Ljava/lang/String; I Ljava/lang/String;)V
-    """
 
     list_HttpHost_scheme_http = []
     path_HttpHost_scheme_http = vmx.get_tainted_packages().search_class_methods_exact_match(
@@ -2169,8 +1749,6 @@ Google Chrome을 사용하여 탐색:
 
     # ------------------------------------------------------------------------
     # WebViewClient onReceivedSslError errors
-
-    # First, find out who calls setWebViewClient
     path_webviewClient_new_instance = vmx.get_tainted_packages().search_class_methods_exact_match(
         "Landroid/webkit/WebView;", "setWebViewClient", "(Landroid/webkit/WebViewClient;)V")
     dic_webviewClient_new_instance = filteringEngine.get_class_container_dict_by_new_instance_classname_in_paths(d,
@@ -2178,7 +1756,6 @@ Google Chrome을 사용하여 탐색:
                                                                                                                  path_webviewClient_new_instance,
                                                                                                                  1)
 
-    # Second, find which class and method extends it
     list_webviewClient = []
     methods_webviewClient = get_method_ins_by_superclass_and_method(d, ["Landroid/webkit/WebViewClient;"],
                                                                     "onReceivedSslError",
@@ -2192,11 +1769,11 @@ Google Chrome을 사용하여 탐색:
     if list_webviewClient:
         writer.startWriter("SSL_WEBVIEW", LEVEL_CRITICAL, u"SSL 구현 검사(WebView위한 WebViewClient)",
                            u"""SSL 인증서가 잘못된 경우에도 연결을 허용하는 확장 "WebViewClient"의 메서드 내에서 "handler.proceed();"를 사용하지 마십시오(MITM 취약성).
-               참조:
-               (1)WebView 공격: https://www.iseclab.org/papers/webview_leet13.pdf 
-               (2)OWASP Mobile Top 10 문서: https://www.owasp.org/index.php/Mobile_Top_10_2014-M3
-               (3)https://jira.appcelerator.org/browse/TIMOB-4488
-               취약한 코드:
+참조:
+(1)WebView 공격: https://www.iseclab.org/papers/webview_leet13.pdf 
+(2)OWASP Mobile Top 10 문서: https://www.owasp.org/index.php/Mobile_Top_10_2014-M3
+(3)https://jira.appcelerator.org/browse/TIMOB-4488
+취약한 코드:
                """, ["SSL_Security"])
 
         for method in list_webviewClient:
@@ -2213,19 +1790,6 @@ Google Chrome을 사용하여 탐색:
 
     # ------------------------------------------------------------------------
     # WebView setJavaScriptEnabled - Potential XSS:
-
-    """
-        Java Example code:
-            webView1 = (WebView)findViewById(R.id.webView1);
-            webView1.setWebViewClient(new ExtendedWebView());
-            WebSettings webSettings = webView1.getSettings();
-            webSettings.setJavaScriptEnabled(true);
-
-        Smali Example code:
-            const/4 v1, 0x1
-            invoke-virtual {v0, v1}, Landroid/webkit/WebSettings;->setJavaScriptEnabled(Z)V
-    """
-
     list_setJavaScriptEnabled_XSS = []
     path_setJavaScriptEnabled_XSS = vmx.get_tainted_packages().search_class_methods_exact_match(
         "Landroid/webkit/WebSettings;", "setJavaScriptEnabled", "(Z)V")
@@ -2249,28 +1813,10 @@ Google Chrome을 사용하여 탐색:
     # ------------------------------------------------------------------------
     # HttpURLConnection bug checking:
 
-    """
-        Example Java code:
-            private void disableConnectionReuseIfNecessary() {
-                // Work around pre-Froyo bugs in HTTP connection reuse.
-                if (Integer.parseInt(Build.VERSION.SDK) < Build.VERSION_CODES.FROYO) {
-                    System.setProperty("http.keepAlive", "false");
-                }
-            }
-
-        Example Bytecode code:
-            const-string v0, "http.keepAlive"
-            const-string v1, "false"
-            invoke-static {v0, v1}, Ljava/lang/System;->setProperty(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-
-    """
-
     if (int_min_sdk is not None) and (int_min_sdk <= 8):
 
         pkg_HttpURLConnection = vmx.get_tainted_packages().search_packages("Ljava/net/HttpURLConnection;")
         pkg_HttpURLConnection = filteringEngine.filter_list_of_paths(d, pkg_HttpURLConnection)
-
-        # Check only when using the HttpURLConnection
         if pkg_HttpURLConnection:
 
             list_pre_Froyo_HttpURLConnection = []
@@ -2299,8 +1845,8 @@ Google Chrome을 사용하여 탐색:
 "HttpURLConnection"을 사용하고 있습니다. 안드로이드 2.2(Froyo) 이전 버전에는 버그가 몇 가지 있습니다. 
 특히 읽을 수 있는 InputStream에서 close()를 호출하면 연결 풀에 독이 발생할 수 있습니다. 연결 풀링을 사용하지 않도록 설정하여 이 문제를 해결하십시오.
 참조를 확인하십시오.:
- (1)http://developer.android.com/reference/java/net/HttpURLConnection.html
- (2)http://android-developers.blogspot.tw/2011/09/androids-http-clients.html"""
+(1)http://developer.android.com/reference/java/net/HttpURLConnection.html
+(2)http://android-developers.blogspot.tw/2011/09/androids-http-clients.html"""
                     writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_NOTICE, u"HttpURLConnection Android 버그 검사",
                                        output_string)
 
@@ -2310,8 +1856,8 @@ Google Chrome을 사용하여 탐색:
 "HttpURLConnection"을 사용하고 있습니다. 안드로이드 2.2(Froyo) 이전 버전에는 버그가 몇 가지 있습니다. 
 특히 읽을 수 있는 InputStream에서 close()를 호출하면 연결 풀에 독이 발생할 수 있습니다. 연결 풀링을 사용하지 않도록 설정하여 이 문제를 해결하십시오.
 참조를 확인하십시오.: 
- (1)http://developer.android.com/reference/java/net/HttpURLConnection.html
- (2)http://android-developers.blogspot.tw/2011/09/androids-http-clients.html"""
+(1)http://developer.android.com/reference/java/net/HttpURLConnection.html
+(2)http://android-developers.blogspot.tw/2011/09/androids-http-clients.html"""
 
                 writer.startWriter("HTTPURLCONNECTION_BUG", LEVEL_NOTICE, u"HttpURLConnection Android 버그 검사",
                                    output_string)
@@ -2357,25 +1903,6 @@ Google Chrome을 사용하여 탐색:
                            ["Database"])
 
     # ------------------------------------------------------------------------
-
-    """
-        MODE_WORLD_READABLE or MODE_WORLD_WRITEABLE checking:
-
-        MODE_WORLD_READABLE = 1
-        MODE_WORLD_WRITEABLE = 2
-        MODE_WORLD_READABLE + MODE_WORLD_WRITEABLE = 3
-
-        http://jimmy319.blogspot.tw/2011/07/android-internal-storagefile-io.html
-
-        Example Java Code:
-            FileOutputStream outputStream = openFileOutput("Hello_World", Activity.MODE_WORLD_READABLE);
-
-        Example Smali Code:
-            const-string v3, "Hello_World"
-            const/4 v4, 0x1
-            invoke-virtual {p0, v3, v4}, Lcom/example/android_mode_world_testing/MainActivity;->openFileOutput(Ljava/lang/String;I)Ljava/io/FileOutputStream;
-    """
-
     # Get a list of 'PathP' objects that are vulnerabilities
     list_path_openOrCreateDatabase = []
     list_path_openOrCreateDatabase2 = []
@@ -2455,13 +1982,6 @@ Google Chrome을 사용하여 탐색:
 
     # ------------------------------------------------------------------------
     # List all native method
-
-    """
-        Example:
-            const-string v0, "AndroBugsNdk"
-            invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
-    """
-
     cm = d.get_class_manager()
 
     dic_NDK_library_classname_to_ndkso_mapping = {}
@@ -2502,16 +2022,14 @@ Google Chrome을 사용하여 탐색:
                 if class_name not in dic_native_methods:
                     dic_native_methods[class_name] = []
                 dic_native_methods[class_name].append(method)
-
-            # <<Essential_Block_1>>
             if regexp_sqlcipher_database_class.match(class_name):
                 if (method.get_name() == "dbopen") or (
-                        method.get_name() == "dbclose"):  # Make it to 2 conditions to add efficiency
+                        method.get_name() == "dbclose"):
                     isUsingSQLCipher = True  # This is for later use
 
     if dic_native_methods:
 
-        if args.extra == 2:  # The output may be too verbose, so make it an option
+        if args.extra == 2:
 
             dic_native_methods_sorted = collections.OrderedDict(sorted(dic_native_methods.items()))
 
@@ -2531,13 +2049,10 @@ Google Chrome을 사용하여 탐색:
         if args.extra == 2:  # The output may be too verbose, so make it an option
             writer.startWriter("NATIVE_METHODS", LEVEL_INFO, u"기본 메서드 검사", u"네이티브 메서드를 찾을 수 없습니다.")
 
-    # Framework Detection: Bangcle
-
     is_using_Framework_Bangcle = False
     is_using_Framework_ijiami = False
     is_using_Framework_MonoDroid = False
 
-    # Display only when using the Framework (Notice: This vector depends on "List all native method")
     if list_NDK_library_classname_to_ndkso_mapping:
 
         android_name_in_application_tag = a.get_android_name_in_application_tag()
@@ -2580,7 +2095,7 @@ Google Chrome을 사용하여 탐색:
                            u"이 앱은 MonoDroid 암호화 프레임워크(http://xamarin.com/android)를 사용하고 있습니다.", ["Framework"])
     else:
         writer.startWriter("FRAMEWORK_MONODROID", LEVEL_INFO, u"암호화 프레임워크 - MonoDroid",
-                           u" 앱은 MonoDroid 암호화 프레임워크(http://xamarin.com/android)를 사용하고 있지 않습니다.", ["Framework"])
+                           u"앱은 MonoDroid 암호화 프레임워크(http://xamarin.com/android)를 사용하고 있지 않습니다.", ["Framework"])
 
     # ------------------------------------------------------------------------
     # Detect dynamic code loading
@@ -2708,14 +2223,6 @@ Google Chrome을 사용하여 탐색:
 
     # ------------------------------------------------------------------------
     # Find all "dangerous" permission
-
-    """
-        android:permission
-        android:readPermission (for ContentProvider)
-        android:writePermission (for ContentProvider)
-    """
-
-    # Get a mapping dictionary
     PermissionName_to_ProtectionLevel = a.get_PermissionName_to_ProtectionLevel_mapping()
 
     dangerous_custom_permissions = []
@@ -2727,10 +2234,10 @@ Google Chrome을 사용하여 탐색:
 
         writer.startWriter("PERMISSION_DANGEROUS", LEVEL_CRITICAL, u"AndroidManifest 위험한 권한의 보호수준 검사",
                            u"""다음 클래스의 보호 수준은 "위험"하므로 다른 앱이 이 권한(AndroidManifest.xml)에 액세스할 수 있습니다. 
-               앱에서 "Android:protection"을 사용하여 권한을 선언해야 합니다."signature" 또는 "signatureOrSystem"의 수준"을 지정하여 다른 앱이 이 앱에 대한 메시지를 등록하고 받을 수 없도록 합니다. 
-               Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선언한 애플리케이션과 동일한 인증서로 서명되어야 함을 보장합니다. 
-               일부 관련 사례를 확인하십시오.: http://www.wooyun.org/bugs/wooyun-2010-039697  
-               다음 권한을 변경하십시오.:""")
+앱에서 "Android:protection"을 사용하여 권한을 선언해야 합니다."signature" 또는 "signatureOrSystem"의 수준"을 지정하여 다른 앱이 이 앱에 대한 메시지를 등록하고 받을 수 없도록 합니다. 
+Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선언한 애플리케이션과 동일한 인증서로 서명되어야 함을 보장합니다. 
+일부 관련 사례를 확인하십시오.: http://www.wooyun.org/bugs/wooyun-2010-039697  
+다음 권한을 변경하십시오.:""")
 
         for class_name in dangerous_custom_permissions:
             writer.write(class_name)
@@ -2756,9 +2263,9 @@ Google Chrome을 사용하여 탐색:
     if normal_or_default_custom_permissions:
         writer.startWriter("PERMISSION_NORMAL", LEVEL_WARNING, u"AndroidManifest 일반 권한의 보호수준 검사",
                            u"""다음 클래스의 보호 수준은 "일반" 또는 기본값입니다(AndroidManifest.xml). 
-               앱에서 "Android:protection"을 사용하여 권한을 선언해야 합니다."signature" 또는 "signatureOrSystem"의 수준"을 지정하여 다른 앱이 이 앱에 대한 메시지를 등록하고 받을 수 없도록 합니다. 
-               Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선언한 애플리케이션과 동일한 인증서로 서명되어야 함을 보장합니다. 
-               이러한 권한을 모두 내보내거나 "signature" 또는 "signatureOrSystem" 보호 수준으로 변경해야 합니다.""")
+앱에서 "Android:protection"을 사용하여 권한을 선언해야 합니다."signature" 또는 "signatureOrSystem"의 수준"을 지정하여 다른 앱이 이 앱에 대한 메시지를 등록하고 받을 수 없도록 합니다. 
+Android:protectionLevel="signature"는 권한을 요청한 앱이 권한을 선언한 애플리케이션과 동일한 인증서로 서명되어야 함을 보장합니다. 
+이러한 권한을 모두 내보내거나 "signature" 또는 "signatureOrSystem" 보호 수준으로 변경해야 합니다.""")
         for class_name in normal_or_default_custom_permissions:
             writer.write(class_name)
             who_use_this_permission = get_all_components_by_permission(a.get_AndroidManifest(), class_name)
@@ -2772,7 +2279,6 @@ Google Chrome을 사용하여 탐색:
                            u"기본 또는 \"기본\" 보호 수준 사용자 지정 사용 권한을 찾을 수 없습니다(AndroidManifest.xml).")
 
     # ------------------------------------------------------------------------
-
     # Lost "android:" prefix in exported components
 
     list_lost_exported_components = []
@@ -2788,9 +2294,10 @@ Google Chrome을 사용하여 탐색:
     if list_lost_exported_components:
         writer.startWriter("PERMISSION_NO_PREFIX_EXPORTED", LEVEL_CRITICAL, u"AndroidManifest 손실 접두사 검사",
                            u""""android:" 접두사(AndroidManifest.xml)를 추가하지 않은 내보낸 구성 요소를 찾았습니다. 
-               참조: (1)http://blog.curesec.com/article/blog/35.html
-                              (2)http://safe.baidu.com/2014-07/cve-2013-6272.html
-                              (3)http://blogs.360.cn/360mobile/2014/07/08/cve-2013-6272/""", None, "CVE-2013-6272")
+참조: 
+(1)http://blog.curesec.com/article/blog/35.html
+(2)http://safe.baidu.com/2014-07/cve-2013-6272.html
+(3)http://blogs.360.cn/360mobile/2014/07/08/cve-2013-6272/""", None, "CVE-2013-6272")
 
         for tag, name in list_lost_exported_components:
             writer.write(("%10s => %s") % (tag, a.format_value(name)))
@@ -2800,106 +2307,7 @@ Google Chrome을 사용하여 탐색:
                            u"\"android:\"에 접두사를 추가하지 않은 내보낸 구성 요소가 없습니다.", None, "CVE-2013-6272")
 
     # ------------------------------------------------------------------------
-
     # "exported" checking (activity, activity-alias, service, receiver):
-
-    """
-        Remember: Even if the componenet is protected by "signature" level protection,
-        it still cannot receive the broadcasts from other apps if the component is set to [exported="false"].
-        ---------------------------------------------------------------------------------------------------
-
-        Even if the component is exported, it still can be protected by the "android:permission", for example:
-
-        <permission
-            android:name="com.example.androidpermissionexported.PermissionControl"
-            android:protectionLevel="signature" >
-        </permission>
-        <receiver
-            android:name=".SimpleBroadcastReceiver"
-            android:exported="true"
-            android:permission="com.example.androidpermissionexported.PermissionControl" >
-            <intent-filter>
-                <action android:name="com.example.androidpermissionexported.PermissionTest" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
-
-        Apps with the same signature(signed with the same certificate) can send and receive the broadcasts with each other.
-        Conversely, apps that do not have the same signature cannot send and receive the broadcasts with each other.
-        If the protectionLevel is "normal" or not set, then the sending and receiving of broadcasts are not restricted.
-
-        Even if the Action is used by the app itself, it can still be initialized from external(3rd-party) apps 
-        if the [exported="false"] is not specified, for example:
-        Intent intent = new Intent("net.emome.hamiapps.am.action.UPDATE_AM");
-        intent.setClassName("net.emome.hamiapps.am", "net.emome.hamiapps.am.update.UpdateAMActivity");
-        startActivity(intent);
-
-        ---------------------------------------------------------------------------------------
-
-        **[PERMISSION_CHECK_STAGE]:
-            (1)If android:permission not set => Warn it can be accessed from external
-            (2)If android:permission is set => 
-                Check its corresponding android:protectionLevel is "not set(default: normal)" or "normal" or "dangerous"=> Warn it can be accessed from external
-                If the corresponding permission tag is not found => Ignore
-
-                **If the names of all the Action(s) are prefixing with "com.android." or "android." =>  Notify with a low priority warning
-                    <receiver android:name="jp.naver.common.android.billing.google.checkout.BillingReceiver">
-                        <intent-filter>
-                            <action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
-                            <action android:name="com.android.vending.billing.RESPONSE_CODE" />
-                            <action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
-                        </intent-filter>
-                    </receiver>
-                **You need to consider the Multiple Intent, for example:
-                    <receiver android:name=".service.push.SystemBroadcastReceiver">
-                        <intent-filter android:enabled="true" android:exported="false">
-                            <action android:name="android.intent.action.BOOT_COMPLETED" />
-                            <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                        </intent-filter>
-                        <intent-filter android:enabled="true" android:exported="false">
-                            <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                            <data android:scheme="package" android:path="jp.naver.line.android" />
-                        </intent-filter>
-                    </receiver>
-                **The preceding example: intent-filter is set incorrectly. intent-filter does not have the "android:exported" => Warn misconfiguration
-
-
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        [REASON_REGION_1]
-        **If exported is not set, the protectionalLevel of android:permission is set to "normal" by default =>
-            1.It "cannot" be accessed by other apps on Android 4.2 devices 
-            2.It "can" be accessed by other apps on Android 4.1 devices 
-
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        If it is receiver, service, activity or activity-alias, check if the exported is set:
-            exported="false" => No problem
-
-            exported="true" => Go to [PERMISSION_CHECK_STAGE]
-
-            exported is not set => 
-                If it has any intent-filter:
-                    Yes => Go to [PERMISSION_CHECK_STAGE]
-                    No  => If the intent-filter is not existed, it is exported="false" by default => X(Ignore)
-
-            **Main Problem: If it is still necessary to check the setting of "android:permission"
-
-
-        If it is provider, the intent-filter must not exist, so check if the exported is set:
-            ->[exported="true"] or [exported is not set] :
-
-                =>1.If [exported is not set] + [android:targetSdkVersion >= 17], add to the Warning List. Check the reason: [REASON_REGION_1]
-                    It is suggested to add "exported" and tell the users that the default value is not the same among different platforms
-                    => Check Google's document (The default value is "true" for applications that set either android:minSdkVersion or android:targetSdkVersion to "16" or lower. 
-                        For applications that set either of these attributes to "17" or higher, the default is "false". - http://developer.android.com/guide/topics/manifest/provider-element.html#exported)
-
-                =>2.[PERMISSION_CHECK_STAGE, and check "android:readPermission" and "android:writePermission", and check android:permission, android:writePermission, android:readPermission]
-                        => If any of the corresponding setting for protectionLevel is not found ,then ignore it.
-                           If any of the corresponding setting for protectionLevel is found, warn the users when the protectionLevel is "dangerous" or "normal".
-
-            ->exported="false": 
-                => X(Ignore)
-    """
-
     list_ready_to_check = []
     find_tags = ["activity", "activity-alias", "service", "receiver"]
     xml = a.get_AndroidManifest()
@@ -2931,14 +2339,11 @@ Google Chrome을 사용하여 탐색:
                         if category_name == "android.intent.category.LAUNCHER":
                             is_launcher = True
 
-                # exported="true" or exported not set
                 if exported == "":
                     if has_any_actions_in_intent_filter:
-                        # CHECK
                         is_ready_to_check = True
 
-                elif exported.lower() == "true":  # exported = "true"
-                    # CHECK
+                elif exported.lower() == "true":
                     is_ready_to_check = True
 
                 if (is_ready_to_check) and (not is_launcher):
@@ -2958,15 +2363,12 @@ Google Chrome을 사용하여 탐색:
         has_any_actions_in_intent_filter = i[5]
         isSyncAdapterService = i[6]
         is_dangerous = False
-        if permission == "":  # permission is not set
+        if permission == "":
             is_dangerous = True
-        else:  # permission is set
             if permission in PermissionName_to_ProtectionLevel:
                 protectionLevel = PermissionName_to_ProtectionLevel[permission]
                 if (protectionLevel == PROTECTION_NORMAL) or (protectionLevel == PROTECTION_DANGEROUS):
                     is_dangerous = True
-        # else: #cannot find the mapping permission
-        # 	is_dangerous = True
 
         if is_dangerous:
             if (component == "service") and (has_any_actions_in_intent_filter) and (not isSyncAdapterService):
@@ -3008,7 +2410,6 @@ Google Chrome을 사용하여 탐색:
         exported = item.getAttribute("android:exported")
 
         if (not isNullOrEmptyString(name)) and (exported.lower() != "false"):
-            # exported is only "true" or non-set
             permission = item.getAttribute("android:permission")
             readPermission = item.getAttribute("android:readPermission")
             writePermission = item.getAttribute("android:writePermission")
@@ -3017,9 +2418,9 @@ Google Chrome을 사용하여 탐색:
             list_ready_to_check.append(
                 (a.format_value(name), exported, permission, readPermission, writePermission, has_exported))
 
-    list_alerting_exposing_providers_no_exported_setting = []  # providers that Did not set exported
-    list_alerting_exposing_providers = []  # provider with "true" exported
-    for i in list_ready_to_check:  # only exist "exported" provider or not set
+    list_alerting_exposing_providers_no_exported_setting = []
+    list_alerting_exposing_providers = []
+    for i in list_ready_to_check:
         exported = i[1]
         permission = i[2]
         readPermission = i[3]
@@ -3035,27 +2436,27 @@ Google Chrome을 사용하여 탐색:
         if writePermission != "":
             list_perm.append(writePermission)
 
-        if list_perm:  # among "permission" or "readPermission" or "writePermission", any of the permission is set
-            for self_defined_permission in list_perm:  # (1)match any (2)ignore permission that is not found
+        if list_perm:
+            for self_defined_permission in list_perm:
                 if self_defined_permission in PermissionName_to_ProtectionLevel:
                     protectionLevel = PermissionName_to_ProtectionLevel[self_defined_permission]
                     if (protectionLevel == PROTECTION_NORMAL) or (protectionLevel == PROTECTION_DANGEROUS):
                         is_dangerous = True
                         break
             if (exported == "") and (int_target_sdk >= 17) and (
-            is_dangerous):  # permission is not set, it will depend on the Android system
+            is_dangerous):
                 list_alerting_exposing_providers_no_exported_setting.append(i)
 
-        else:  # none of any permission
+        else:
             if exported.lower() == "true":
                 is_dangerous = True
             elif (exported == "") and (
-                    int_target_sdk >= 17):  # permission is not set, it will depend on the Android system
+                    int_target_sdk >= 17):
                 list_alerting_exposing_providers_no_exported_setting.append(i)
 
         if is_dangerous:
             list_alerting_exposing_providers.append(
-                i)  # exported="true" and none of the permission are set => of course dangerous
+                i)
 
     if list_alerting_exposing_providers or list_alerting_exposing_providers_no_exported_setting:
         if list_alerting_exposing_providers_no_exported_setting:  # providers that Did not set exported
@@ -3063,19 +2464,19 @@ Google Chrome을 사용하여 탐색:
             writer.startWriter("PERMISSION_PROVIDER_IMPLICIT_EXPORTED", LEVEL_CRITICAL,
                                u"AndroidManifest ContentProvider Exported 검사",
                                u""""exported" 된 속성(AndroidManifest.xml)을 명시적으로 지정하는 것이 좋습니다.
-               Android "android:targetSdkVersion" < 17의 경우 ContentProvider의 내보낸 값은 기본적으로 "true"입니다.
-               Android "android:targetSdkVersion" >= 17의 경우 ContentProvider의 내보낸 값은 기본적으로 "false"입니다.
-               즉, "android:exported"를 명시적으로 설정하지 않으면 ContentProvider가 Android < 4.2 기기에 노출됩니다.
-               공급자 권한을 [protectionalLevel="normal"]로 설정하더라도 기본 제약 조건으로 인해 Android >= 4.2 기기에서 다른 앱은 여전히 ​​액세스할 수 없습니다.
-               처음에 다른 앱에서 사용하도록 하려면 내보내기를 "true"로 설정하고("signature" protectionalLevel에 의해 보호됨 포함) 사용하지 않으려면 "false"로 설정하십시오.
-               이미 해당 "permission", "writePermission" 또는 "readPermission"을 "signature" protectionLevel 이상으로 설정했다면 "exported"를 "true"로 지정하십시오.
-               Android >= 4.2 기기에서 동일한 서명으로 서명된 다른 앱은 액세스할 수 없기 때문입니다.
-               참조: http://developer.android.com/guide/topics/manifest/provider-element.html#exported
-               취약한 ContentProvider 예시: 
-                 (1)https://www.nowsecure.com/mobile-security/ebay-android-content-provider-injection-vulnerability.html
-                 (2)http://blog.trustlook.com/2013/10/23/ebay-android-content-provider-information-disclosure-vulnerability/
-                 (3)http://www.wooyun.org/bugs/wooyun-2010-039169
-               """)
+Android "android:targetSdkVersion" < 17의 경우 ContentProvider의 내보낸 값은 기본적으로 "true"입니다.
+Android "android:targetSdkVersion" >= 17의 경우 ContentProvider의 내보낸 값은 기본적으로 "false"입니다.
+즉, "android:exported"를 명시적으로 설정하지 않으면 ContentProvider가 Android < 4.2 기기에 노출됩니다.
+공급자 권한을 [protectionalLevel="normal"]로 설정하더라도 기본 제약 조건으로 인해 Android >= 4.2 기기에서 다른 앱에서 액세스할 수 없습니다.
+처음에 다른 앱에서 사용하도록 하려면 내보내기를 "true"로 설정하고("signature" protectionalLevel에 의해 보호됨 포함) 사용하지 않으려면 "false"로 설정하십시오.
+이미 해당 "permission", "writePermission" 또는 "readPermission"을 "signature" protectionLevel 이상으로 설정했다면 "exported"를 "true"로 지정하십시오.
+Android >= 4.2 기기에서 동일한 서명으로 서명된 다른 앱은 액세스할 수 없기 때문입니다.
+참조: 
+http://developer.android.com/guide/topics/manifest/provider-element.html#exported
+취약한 ContentProvider 예시: 
+(1)https://www.nowsecure.com/mobile-security/ebay-android-content-provider-injection-vulnerability.html
+(2)http://blog.trustlook.com/2013/10/23/ebay-android-content-provider-information-disclosure-vulnerability/
+(3)http://www.wooyun.org/bugs/wooyun-2010-039169""")
 
             for i in list_alerting_exposing_providers_no_exported_setting:
                 writer.write(("%10s => %s") % ("provider", i[0]))
@@ -3084,11 +2485,12 @@ Google Chrome을 사용하여 탐색:
 
             writer.startWriter("PERMISSION_PROVIDER_EXPLICIT_EXPORTED", LEVEL_CRITICAL,
                                u"AndroidManifest ContentProvider Exported 검사",
-                               u""""exported"된 ContentProvider를 찾았으므로 기기의 다른 앱이 액세스할 수 있습니다(AndroidManifest.xml). 속성을 [exported="false"]로 수정하거나 원하지 않는 경우 최소한 "signature" protectionalLevel 권한을 설정해야 합니다.
-               취약한 ContentProvider 예시: 
-                 (1)https://www.nowsecure.com/mobile-security/ebay-android-content-provider-injection-vulnerability.html
-                 (2)http://blog.trustlook.com/2013/10/23/ebay-android-content-provider-information-disclosure-vulnerability/
-                 (3)http://www.wooyun.org/bugs/wooyun-2010-039169""")
+                               u""""exported"된 ContentProvider를 찾았으므로 기기의 다른 앱이 액세스할 수 있습니다(AndroidManifest.xml). 
+속성을 [exported="false"]로 수정하거나 원하지 않는 경우 최소한 "signature" protectionalLevel 권한을 설정해야 합니다.
+취약한 ContentProvider 예시: 
+(1)https://www.nowsecure.com/mobile-security/ebay-android-content-provider-injection-vulnerability.html
+(2)http://blog.trustlook.com/2013/10/23/ebay-android-content-provider-information-disclosure-vulnerability/
+(3)http://www.wooyun.org/bugs/wooyun-2010-039169""")
             for i in list_alerting_exposing_providers:
                 writer.write(("%10s => %s") % ("provider", i[0]))
 
@@ -3099,21 +2501,6 @@ Google Chrome을 사용하여 탐색:
 
     # ------------------------------------------------------------------------
     # intent-filter checking:
-
-    """
-        Example misconfiguration:
-            <receiver android:name=".service.push.SystemBroadcastReceiver">
-                <intent-filter android:enabled="true" android:exported="false">
-                    <action android:name="android.intent.action.BOOT_COMPLETED" />
-                    <action android:name="android.intent.action.USER_PRESENT" />
-                </intent-filter>
-                <intent-filter android:enabled="true" android:exported="false">
-                </intent-filter>
-            </receiver>
-
-        Detected1: <intent-filter android:enabled="true" android:exported="false">
-        Detected2: No actions in "intent-filter"
-    """
 
     find_tags = ["activity", "activity-alias", "service", "receiver"]
     xml = a.get_AndroidManifest()
@@ -3138,9 +2525,9 @@ Google Chrome을 사용하여 탐색:
             writer.startWriter("PERMISSION_INTENT_FILTER_MISCONFIG", LEVEL_WARNING,
                                u"AndroidManifest \"intent-filter\" Settings 검사",
                                u"""이러한 구성요소(AndroidManifest.xml)의 "intent-filter" 구성이 잘못되었습니다.
-               "intent-filter" 구성에는 "android:exported" 또는 "android:enabled" 속성이 없어야 합니다.
-               참조: http://developer.android.com/guide/topics/manifest/intent-filter-element.html
-               """)
+"intent-filter" 구성에는 "android:exported" 또는 "android:enabled" 속성이 없어야 합니다.
+참조: 
+http://developer.android.com/guide/topics/manifest/intent-filter-element.html""")
             for tag, name in list_wrong_intent_filter_settings:
                 writer.write(("%10s => %s") % (tag, a.format_value(name)))
 
@@ -3148,9 +2535,9 @@ Google Chrome을 사용하여 탐색:
             writer.startWriter("PERMISSION_INTENT_FILTER_MISCONFIG", LEVEL_CRITICAL,
                                u"AndroidManifest \"intent-filter\" Settings 검사",
                                u"""이러한 구성요소(AndroidManifest.xml)의 "intent-filter" 구성이 잘못되었습니다.
-                "intent-filter"에는 하나 이상의 "액션"이 있어야 합니다.
-               참조: http://developer.android.com/guide/topics/manifest/intent-filter-element.html
-               """)
+"intent-filter"에는 하나 이상의 "액션"이 있어야 합니다.
+참조:
+http://developer.android.com/guide/topics/manifest/intent-filter-element.html""")
             for tag, name in list_no_actions_in_intent_filter:
                 writer.write(("%10s => %s") % (tag, a.format_value(name)))
     else:
@@ -3181,11 +2568,11 @@ Google Chrome을 사용하여 탐색:
         if int_min_sdk < 15:
             writer.startWriter("DB_SQLITE_JOURNAL", LEVEL_NOTICE, u"Android SQLite 데이터베이스 취약성 검사",
                                u"""이 앱은 Android SQLite 데이터베이스를 사용합니다.
-               Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있습니다.
-               그러나 안드로이드 > 4.0으로 업그레이드한 사용자만 해결할 수 있으며 혼자 해결할 수 없습니다(단, "SQL Cipher" 또는 다른 lib로 데이터베이스 및 저널 암호화를 사용할 수 있습니다).
-               참조:
-               (1) http://blog.watchfire.com/files/androidsqlitejournal.pdf 
-               (2) http://www.youtube.com/watch?v=oCXLHjmH5rY """, ["Database"], "CVE-2011-3901")
+Android 4.0 이전 버전에서는 SQLite Journal 정보 노출 취약성이 있습니다.
+그러나 안드로이드 > 4.0으로 업그레이드한 사용자만 해결할 수 있으며 혼자 해결할 수 없습니다(단, "SQL Cipher" 또는 다른 lib로 데이터베이스 및 저널 암호화를 사용할 수 있습니다).
+참조:
+(1) http://blog.watchfire.com/files/androidsqlitejournal.pdf 
+(2) http://www.youtube.com/watch?v=oCXLHjmH5rY """, ["Database"], "CVE-2011-3901")
         else:
             writer.startWriter("DB_SQLITE_JOURNAL", LEVEL_NOTICE, u"Android SQLite 데이터베이스 취약성 검사",
                                u"이 앱은 Android SQLite 데이터베이스를 사용하고 있습니다. 그러나 SQLite Journal 정보 노출 취약성에 시달리지 않습니다.",
@@ -3357,13 +2744,6 @@ Google Chrome을 사용하여 탐색:
     # ------------------------------------------------------------------------
     # Checking sending SMS code
 
-    """
-      Example:
-        Landroid/telephony/SmsManager;->sendDataMessage(Ljava/lang/String; Ljava/lang/String; S [B Landroid/app/PendingIntent; Landroid/app/PendingIntent;)V
-        Landroid/telephony/SmsManager;->sendMultipartTextMessage(Ljava/lang/String; Ljava/lang/String; Ljava/util/ArrayList; Ljava/util/ArrayList; Ljava/util/ArrayList;)V
-        Landroid/telephony/SmsManager;->sendTextMessage(Ljava/lang/String; Ljava/lang/String; Ljava/lang/String; Landroid/app/PendingIntent; Landroid/app/PendingIntent;)V
-    """
-
     list_sms_signatures = [
         ("sendDataMessage",
          "(Ljava/lang/String; Ljava/lang/String; S [B Landroid/app/PendingIntent; Landroid/app/PendingIntent;)V"),
@@ -3416,8 +2796,8 @@ Google Chrome을 사용하여 탐색:
     if path_FileDelete:
         writer.startWriter("FILE_DELETE", LEVEL_NOTICE, u"File Unsafe Delete 검사",
                            u"""삭제한 모든 항목은 사용자나 공격자, 특히 루팅된 기기에 의해 복구될 수 있습니다.
-               필수 파일을 삭제하기 위해 "file.delete()"를 사용하지 마십시오.
-               이 비디오를 확인하십시오: https://www.youtube.com/watch?v=tGw1fxUD-uY""")
+필수 파일을 삭제하기 위해 "file.delete()"를 사용하지 마십시오.
+이 비디오를 확인하십시오: https://www.youtube.com/watch?v=tGw1fxUD-uY""")
         writer.show_Paths(d, path_FileDelete)
     else:
         writer.startWriter("FILE_DELETE", LEVEL_INFO, u"File Unsafe Delete 검사",
@@ -3441,25 +2821,6 @@ Google Chrome을 사용하여 탐색:
 
     # ------------------------------------------------------------------------
     # WebView setAllowFileAccess:
-
-    """
-        Get all "dst" class: Landroid/webkit/WebSettings;
-          => Categorized by src function,
-             If the src function:
-               1.setAllowFileAccess does not exist    OR
-               2.setAllowFileAccess(true)
-                   =>src function may be vulnerable
-
-        **Why check WebSettings? It's because WebView almost always uses the method: WebView->getSettings()
-
-        **Even if the below example, it will finally call WebSettings:
-          class TestWebView extends WebView {
-            public TestWebView(Context context) {
-              super(context);
-            }
-          }
-    """
-
     pkg_WebView_WebSettings = vmx.get_tainted_packages().search_packages("Landroid/webkit/WebSettings;")
     pkg_WebView_WebSettings = filteringEngine.filter_list_of_paths(d, pkg_WebView_WebSettings)
 
@@ -3510,11 +2871,14 @@ Google Chrome을 사용하여 탐색:
 
         writer.startWriter("WEBVIEW_ALLOW_FILE_ACCESS", LEVEL_WARNING, u"WebView 로컬 파일 액세스 공격 검사",
                            u"""WebView에서 "setAllowFileAccess(true)"를 찾거나 설정되지 않았습니다(기본적으로 사용 가능).
-공격자는 WebView에 악의적인 스크립트를 주입하고 로컬 리소스에 액세스할 수 있는 기회를 이용할 수 있습니다. 이 문제는 로컬 파일 시스템 액세스를 비활성화하여 완화하거나 방지할 수 있습니다.
-이렇게 하면 파일 시스템 액세스만 활성화되거나 비활성화됩니다. 자산 및 리소스는 file:///android_asset 및 file:///android_res를 사용하여 계속 액세스할 수 있습니다.
+공격자는 WebView에 악의적인 스크립트를 주입하고 로컬 리소스에 액세스할 수 있는 기회를 이용할 수 있습니다. 
+이 문제는 로컬 파일 시스템 액세스를 비활성화하여 완화하거나 방지할 수 있습니다.
+이렇게 하면 파일 시스템 액세스만 활성화되거나 비활성화됩니다. 
+자산 및 리소스는 file:///android_asset 및 file:///android_res를 사용하여 계속 액세스할 수 있습니다.
 공격자는 "mWebView.loadUrl("file:///data/data/[Your_Package_Name]/[File]");"을 사용하여 앱의 로컬 파일에 액세스할 수 있습니다.
-참조: (1)https://labs.mwrinfosecurity.com/blog/2012/04/23/adventures-with-android-webviews/
-     (2)http://developer.android.com/reference/android/webkit/WebSettings.html#setAllowFileAccess(boolean)
+참조: 
+(1)https://labs.mwrinfosecurity.com/blog/2012/04/23/adventures-with-android-webviews/
+(2)http://developer.android.com/reference/android/webkit/WebSettings.html#setAllowFileAccess(boolean)
 WebView에 "yourWebView.getSettings().setAllowFileAccess(false)"를 추가하거나 수정하십시오.:""", ["WebView"])
         for i in path_setAllowFileAccess_confirm_vulnerable_src_class_func:
             writer.write(i)
@@ -3528,13 +2892,14 @@ WebView에 "yourWebView.getSettings().setAllowFileAccess(false)"를 추가하거
 
     if a.is_adb_backup_enabled():
         writer.startWriter("ALLOW_BACKUP", LEVEL_NOTICE, u"AndroidManifest Adb Backup 검사",
-                           u"""이 앱에 대해 ADB Backup이 활성화됩니다(기본값: 활성화됨). ADB Backup은 모든 파일을 Backup할 수 있는 좋은 도구입니다. 이 앱에 대해 열려 있는 경우 휴대전화를 가진 사람들이 휴대전화에서 이 앱에 대한 모든 민감한 데이터를 복사할 수 있습니다(전제 조건: 1.휴대전화 화면 잠금 해제 2. 개발자 모드를 엽니다). 민감한 데이터에는 평생 액세스 토큰, 사용자 이름 또는 비밀번호 등이 포함될 수 있습니다.
-               ADB Backup 관련 보안 사례:
-               1.http://www.securityfocus.com/archive/1/530288/30/0/threaded
-               2.http://blog.c22.cc/advisories/cve-2013-5112-evernote-android-insecure-storage-of-pin-data-bypass-of-pin-protection/
-               3.http://nelenkov.blogspot.co.uk/2012/06/unpacking-android-backups.html
-               참조: http://developer.android.com/guide/topics/manifest/application-element.html#allowbackup
-               """)
+                           u"""이 앱에 대해 ADB Backup이 활성화됩니다(기본값: 활성화됨). ADB Backup은 모든 파일을 Backup할 수 있는 좋은 도구입니다. 
+이 앱에 대해 열려 있는 경우 휴대전화를 가진 사람들이 휴대전화에서 이 앱에 대한 모든 민감한 데이터를 복사할 수 있습니다(전제 조건: 1.휴대전화 화면 잠금 해제 2. 개발자 모드를 엽니다). 민감한 데이터에는 평생 액세스 토큰, 사용자 이름 또는 비밀번호 등이 포함될 수 있습니다.
+ADB Backup 관련 보안 사례:
+1.http://www.securityfocus.com/archive/1/530288/30/0/threaded
+2.http://blog.c22.cc/advisories/cve-2013-5112-evernote-android-insecure-storage-of-pin-data-bypass-of-pin-protection/
+3.http://nelenkov.blogspot.co.uk/2012/06/unpacking-android-backups.html
+참조:
+http://developer.android.com/guide/topics/manifest/application-element.html#allowbackup""")
     else:
         writer.startWriter("ALLOW_BACKUP", LEVEL_INFO, u"AndroidManifest Adb Backup 검사",
                            u"이 앱은 Adb Backup을 비활성화했습니다.")
@@ -3569,7 +2934,7 @@ WebView에 "yourWebView.getSettings().setAllowFileAccess(false)"를 추가하거
     if list_X509Certificate_Critical_class or list_X509Certificate_Warning_class:
 
         log_level = LEVEL_WARNING
-        log_partial_prefix_msg = u"SSL 인증서의 유효성을 확인하는 조건이 있는지 확인하십시오. 제대로 확인하지 않으면 SSL 연결에 대해 자체 서명, 만료 또는 불일치 CN 인증서를 허용할 수 있습니다."
+        log_partial_prefix_msg = u"SSL 인증서의 유효성을 확인하는 조건이 있는지 확인하십시오. \n제대로 확인하지 않으면 SSL 연결에 대해 자체 서명, 만료 또는 불일치 CN 인증서를 허용할 수 있습니다."
 
         if list_X509Certificate_Critical_class:
             log_level = LEVEL_CRITICAL
@@ -3592,8 +2957,7 @@ WebView에 "yourWebView.getSettings().setAllowFileAccess(false)"를 추가하거
                         dict_X509Certificate_class_name_to_caller_mapping[referenced_class_name].append(method)
 
         writer.startWriter("SSL_X509", log_level, u"SSL 인증서 확인 검사",
-                           log_partial_prefix_msg + u"""
-이것은 critical한 취약점이며 공격자가 사용자 모르게 MITM 공격을 수행할 수 있도록 합니다
+                           log_partial_prefix_msg + u"""이것은 critical한 취약점이며 공격자가 사용자 모르게 MITM 공격을 수행할 수 있도록 합니다.
 사용자의 사용자 이름이나 비밀번호를 전송하는 경우 이러한 민감한 정보가 누출될 수 있습니다.
 참조:
 (1)OWASP Mobile Top 10 doc: https://www.owasp.org/index.php/Mobile_Top_10_2014-M3
@@ -3601,24 +2965,23 @@ WebView에 "yourWebView.getSettings().setAllowFileAccess(false)"를 추가하거
 (3)https://www.securecoding.cert.org/confluence/pages/viewpage.action?pageId=134807561
 "X509Certificate"를 생성하고 "checkClientTrusted", "checkServerTrusted" 및 "getAcceptedIssuers" 기능을 빈 구현으로 재정의하지 마십시오.
 자체 X509Certificate 클래스를 만드는 대신 기존 API를 사용하는 것이 좋습니다.
-이 취약한 코드를 수정하거나 제거하십시오: 
-""", ["SSL_Security"])
+이 취약한 코드를 수정하거나 제거하십시오:""", ["SSL_Security"])
         if list_X509Certificate_Critical_class:
             writer.write("[Confirm Vulnerable]")
             for name in list_X509Certificate_Critical_class:
-                writer.write("=> " + name)
+                #writer.write("=> " + name)
                 if name in dict_X509Certificate_class_name_to_caller_mapping:
                     for used_method in dict_X509Certificate_class_name_to_caller_mapping[name]:
                         writer.write(
-                            "      -> used by: " + used_method.get_class_name() + "->" + used_method.get_name() + used_method.get_descriptor())
+                            "Class--->" + used_method.get_class_name() + "\n    Method--->" + used_method.get_name() + used_method.get_descriptor())
 
         if list_X509Certificate_Warning_class:
             for name in list_X509Certificate_Warning_class:
-                writer.write("=> " + name)
+                #writer.write("=> " + name)
                 if name in dict_X509Certificate_class_name_to_caller_mapping:
                     for used_method in dict_X509Certificate_class_name_to_caller_mapping[name]:
                         writer.write(
-                            "      -> used by: " + used_method.get_class_name() + "->" + used_method.get_name() + used_method.get_descriptor())
+                            "Class--->" + used_method.get_class_name() + "\n    Method--->" + used_method.get_name() + used_method.get_descriptor())
 
     else:
         writer.startWriter("SSL_X509", LEVEL_INFO, u"SSL 인증서 확인 검사",
@@ -3649,8 +3012,6 @@ WebView에 "yourWebView.getSettings().setAllowFileAccess(false)"를 추가하거
 
 
 def __persist_db(writer, args):
-    # starting_dvm
-    # starting_androbugs
 
     if platform.system().lower() == "windows":
         db_config_file = os.path.join(os.path.dirname(sys.executable), 'androbugs-db.cfg')
@@ -3683,7 +3044,6 @@ def __persist_db(writer, args):
     try:
 
         if analyze_status is not None:
-            # You might not get Package name when in "starting_apk" stage
 
             packed_analyzed_results = writer.get_packed_analyzed_results_for_mongodb()  # "details" will only be shown when success
             packed_analyzed_results_fast_search = writer.get_search_enhanced_packed_analyzed_results_for_mongodb()  # specifically designed for Massive Analysis
@@ -3714,11 +3074,6 @@ def __persist_db(writer, args):
             writer.writeInf_ForceNoPrint("analyze_error_message", str(err))
 
             packed_analyzed_results = writer.getInf()
-            """
-                http://stackoverflow.com/questions/5713218/best-method-to-delete-an-item-from-a-dict
-                There's also the minor point that .pop will be slightly slower than the del since it'll translate to a function call rather than a primitive.
-                packed_analyzed_results.pop("details", None)	#remove the "details" tag, if the key is not found => return "None"
-            """
             if "details" in packed_analyzed_results:  # remove "details" result to prevent the issue is generating by the this item
                 del packed_analyzed_results["details"]
 
@@ -3766,19 +3121,32 @@ def main():
     try:
 
         # Print Title
-        writer.writePlainInf("""*************************************************************************
-**   AndroBugs Framework - Android App Security Vulnerability Scanner  **
-**                            version: 1.0.0                           **
-**     author: Yu-Cheng Lin (@AndroBugs, http://www.AndroBugs.com)     **
-**               contact: androbugs.framework@gmail.com                **
-*************************************************************************""")
+        writer.writePlainInf("""          ...                      ...
+           ..J..                 ..B..
+            ..J..  . ....... .  ..B..
+               JBtoolJBtoolJBtoolJ
+              .JBtoolJBtoolJBtoolJB.
+           ..JBtoolJBtoolJBtoolJBtool..
+         ..JBtoolJBtoolJBtoolJBtoolJBtl..           
+        .JBtoolJBtoolJBtoolJBtoolJBtooll..           
+      .JBtool/   \JBtoolJBtoolJB/   \JBtool. 
+      .JBtool\___/JBtoolJBtoolJB\___/JBtool.
+      .JBtoolJBtoolJBtoolJBtoolJBtoolJBtool.     
+      .JBtoolJBtoolJBtoolJBtoolJBtoolJBtool.     
+      .JBtoolJBtoolJBtoolJBtoolJBtoolJBtool.
+      .JBtoolJBtool|          |JBtoolJBtool.
+      .JBtoolJBtool|          |JBtoolJBtool.     
+      .JBtoolJBtool|__________|JBtoolJBtool.
+      .JBtoolJBtoolJBtoolJBtoolJBtoolJBtool.
+      .JBtoolJBtoolJBtoolJBtoolJBtoolJBtool.
+------------------------------------------------------------------------------------------------""")
 
         # Analyze
         __analyze(writer, args)
 
         analyze_signature = get_hash_scanning(writer)
         writer.writeInf_ForceNoPrint("signature_unique_analyze",
-                                     analyze_signature)  # For uniquely distinguish the analysis report
+                                     analyze_signature)
         writer.append_to_file_io_information_output_list("Analyze Signature: " + analyze_signature)
         writer.append_to_file_io_information_output_list(
             "------------------------------------------------------------------------------------------------")
@@ -3793,13 +3161,13 @@ def main():
         writer.writeInf_ForceNoPrint("analyze_error_message", err_expected.get_err_message())
 
         writer.writeInf_ForceNoPrint("signature_unique_analyze",
-                                     get_hash_scanning(writer))  # For uniquely distinguish the analysis report
+                                     get_hash_scanning(writer))
         writer.writeInf_ForceNoPrint("signature_unique_exception", get_hash_exception(writer))
 
         if DEBUG:
             print(err_expected)
 
-    except BadZipfile as zip_err:  # This may happen in the "a = apk.APK(apk_Path)"
+    except BadZipfile as zip_err:
 
         writer.update_analyze_status("fail")
 
@@ -3812,7 +3180,7 @@ def main():
         writer.writeInf_ForceNoPrint("analyze_error_message", str(zip_err))
 
         writer.writeInf_ForceNoPrint("signature_unique_analyze",
-                                     get_hash_scanning(writer))  # For uniquely distinguish the analysis report
+                                     get_hash_scanning(writer))
         writer.writeInf_ForceNoPrint("signature_unique_exception", get_hash_exception(writer))
 
         if DEBUG:
@@ -3823,7 +3191,6 @@ def main():
 
         writer.update_analyze_status("fail")
 
-        # Save the fail message to db
         writer.writeInf_ForceNoPrint("analyze_error_detail_traceback", traceback.format_exc())
 
         writer.writeInf_ForceNoPrint("analyze_error_type_expected", False)
@@ -3855,13 +3222,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-"""
-	Packages do not check:
-		java
-		android
-		com.google
-		org.apache
-		org.json
-		org.xml
-"""
