@@ -1547,8 +1547,8 @@ API 수준 JELLY_BEAN(4.2) 이하를 대상으로 하는 애플리케이션의 �
     if list_code_for_preventing_screen_capture:
         writer.startWriter("HACKER_PREVENT_SCREENSHOT_CHECK", LEVEL_NOTICE, u"스크린샷 캡처 방지",
                            u"""이 앱에는 캡처를 방지하는 코드가 설정되어 있습니다.
-               예시: getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-               개발자가 앱을 보호하기 위해 사용합니다.:""", ["Hacker"])
+예시: getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+개발자가 앱을 보호하기 위해 사용합니다.:""", ["Hacker"])
         for interesting_code in list_code_for_preventing_screen_capture:
             writer.show_Path(d, interesting_code)
     else:
@@ -1629,12 +1629,10 @@ API 수준 JELLY_BEAN(4.2) 이하를 대상으로 하는 애플리케이션의 �
 (3)http://www.wooyun.org/bugs/wooyun-2010-052339
 Google 문서: http://developer.android.com/training/articles/security-ssl.html (주의: HostnameVerifier를 교체하는 것은 매우 위험할 수 있습니다). 
 OWASP Mobile top 10개 문서: https://www.owasp.org/index.php/Mobile_Top_10_2014-M3
-
 CN(Common Name) 인증의 중요도를 확인합니다.
 Google Chrome을 사용하여 탐색:
 - https://www.google.com   => SSL 인증서가 유효함
 - https://60.199.175.158/  => Google.com의 IP 주소이지만 CN이 일치하지 않아 인증서가 유효하지 않습니다. Google.com으로 이동할 수 있지만 공격자와 일반 사용자를 구분할 수 없습니다.
-
 다음 메서드의 코드를 확인하십시오.:"""
 
         writer.startWriter("SSL_CN1", LEVEL_CRITICAL, u"SSL 구현 검사(사용자 지정 클래스에서 호스트 이름 확인)", output_string,
@@ -2957,7 +2955,7 @@ http://developer.android.com/guide/topics/manifest/application-element.html#allo
                         dict_X509Certificate_class_name_to_caller_mapping[referenced_class_name].append(method)
 
         writer.startWriter("SSL_X509", log_level, u"SSL 인증서 확인 검사",
-                           log_partial_prefix_msg + u"""이것은 critical한 취약점이며 공격자가 사용자 모르게 MITM 공격을 수행할 수 있도록 합니다.
+                           log_partial_prefix_msg + u"""\n이것은 critical한 취약점이며 공격자가 사용자 모르게 MITM 공격을 수행할 수 있도록 합니다.
 사용자의 사용자 이름이나 비밀번호를 전송하는 경우 이러한 민감한 정보가 누출될 수 있습니다.
 참조:
 (1)OWASP Mobile Top 10 doc: https://www.owasp.org/index.php/Mobile_Top_10_2014-M3
