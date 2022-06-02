@@ -3137,6 +3137,8 @@ def main():
       .JBtoolJBtool|__________|JBtoolJBtool.
       .JBtoolJBtoolJBtoolJBtoolJBtoolJBtool.
       .JBtoolJBtoolJBtoolJBtoolJBtoolJBtool.
+      
+        2022 Capstone JBtool Static Alaysis
 ------------------------------------------------------------------------------------------------""")
 
         # Analyze
